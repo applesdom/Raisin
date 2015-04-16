@@ -1,0 +1,167 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>Test Page</title>
+  <style>
+    body {    
+    margin: 0;
+    padding: 0;
+	}
+	
+//	canvas {
+//		width:  100%;
+//		height: 100%;
+//		margin: 0px;
+	}
+  </style>
+
+</head>
+  <script src="https://code.jquery.com/jquery-2.1.3.min.js">
+  </script>
+
+<body>
+	<canvas id="draw" width="1600px" height="900px"></canvas>
+</body>
+
+<script>
+	var WIDTH = 800;
+	var HEIGHT = 600;
+	var FPS = 50;
+
+	function Point(x, y){
+		this.y = y;
+		this.x = x;
+		
+		this.mag = function(){
+			return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+		}
+		
+		this.add = function(p){
+			return new Point(this.x + p.x, this.y + p.y);
+		}
+		
+		this.sub = function(p){
+			return new Point(this.x - p.x, this.y - p.y);
+		}
+		
+		this.mul = function(s){
+			return new Point(this.x * s, this.y * s);
+		}
+		
+		this.scale = function(s){
+			return new Point((s / this.mag()) * this.x, (s / this.mag()) * this.y);
+		}
+		
+		this.toString = function(){
+			return x + ', ' + y;
+		}
+	}
+	
+	function Dot(pos){
+		this.type = "Dot";
+	
+		this.pos = pos;
+		
+		this.tick = function(){
+		
+		}
+		
+		this.render = function(g){
+			g.fillStyle = "#D0D000";
+			g.fillRect(this.pos.x - 4, this.pos.y - 4, 8, 8);
+		}
+	}
+	
+	function Player(pos){
+		this.type = "Player";
+	
+		this.pos = pos;
+		this.vel = new Point(0, 0);
+		this.acc = new Point(0, 0);
+		
+		this.t = new Point(-1, -1);
+		
+		this.speed = 4;
+		this.accel = 0.1;
+		
+		this.tick = function(){
+			if(this.t.sub(-1, -1).mag() != 0){
+			
+				this.acc = ((this.t.sub(this.pos)).mul((this.speed + (this.pos.sub(this.t)).mag() / 100) / (this.t.sub(this.pos)).mag())).sub(this.vel);
+			
+				if(this.acc.mag() > this.accel){this.acc = this.acc.scale(this.accel)};
+			}
+			
+			this.vel = this.vel.add(this.acc);
+			if(this.vel.mag() > 10){this.vel = this.vel.scale(10);}
+			
+			this.pos = this.pos.add(this.vel);
+		}
+		
+		this.render = function(g){
+			g.fillStyle = "#FF0000";
+			g.fillRect(this.pos.x - 7.5, this.pos.y - 7.5, 15, 15);
+		}
+	}
+	
+	////
+	
+	var canvas = document.getElementById('draw');
+	
+	canvas.width = WIDTH;
+	canvas.height = HEIGHT;
+	
+	var g = canvas.getContext('2d');
+	
+	////
+	
+	var game = {};
+	
+	game.ents = [];
+	
+	game.run = function(){
+		game.tick();
+		game.render(g);
+	}
+	
+	game.tick = function(){
+		for (i = 0; i < game.ents.length; i++){
+			var cur = game.ents[i];
+			cur.tick();
+			
+			if(cur.type == "Player"){
+				for(j = 0; j < game.ents.length; j++){
+					var nex = game.ents[j];
+					
+					if(nex.type == "Dot" && (nex.pos.sub(cur.pos)).mag() < 12){
+						nex.pos = new Point(Math.random() * WIDTH, Math.random() * HEIGHT);
+						cur.t = nex.pos;
+					}
+				}
+			}
+		}
+	}
+	
+	game.render = function(g){
+		g.fillStyle = "#F0F0F0";
+		g.fillRect(0, 0, WIDTH, HEIGHT);
+		
+		for (i = 0; i < game.ents.length; i++){
+			game.ents[i].render(g);
+		}
+	}
+	
+	////
+	
+	bill = new Player(new Point(100, 100));
+	bill.t = new Point(200, 200);
+	game.ents[0] = bill;
+	game.ents[1] = new Dot(new Point(200, 200));
+	
+	////
+	
+	game._intervalId = setInterval(game.run, 1000 / FPS);
+	
+</script>
+
+</html>
