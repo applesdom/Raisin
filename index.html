@@ -158,7 +158,6 @@
     
 	var WIDTH;
 	var HEIGHT;
-	var FPS = 50;
 	
 	var canvas = document.getElementById('draw');
 
@@ -177,14 +176,21 @@
 	
 	var game = {};
 
+	game.FPS = 50;
+
 	// create gui object
 	game.gui = new dat.GUI();
+
+	game.gui.add(game,"FPS",1,100);
 	
 	game.ents = new ArrayList();
 	
 	game.run = function(){
 		game.tick();
 		game.render(g);
+
+		// continue the game loop
+		setTimeout(game.run, 1000 / game.FPS);
 	}
 	
 	game.tick = function(){
@@ -279,7 +285,8 @@
 	
 	////
 	
-	game._intervalId = setInterval(game.run, 1000 / FPS);
+	// start the game loop
+	setTimeout(game.run, 1000 / game.FPS);
 	
 </script>
 
