@@ -1,0 +1,10 @@
+#To push to heroku...
+
+#First set up remote using git shell (only done once):
+
+git remote add heroku https://git.heroku.com/raisinraisin.git
+
+#Then each time you want to push your changes to https://raisinraisin.herokuapp.com/, do this:
+
+
+
