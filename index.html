@@ -23,8 +23,8 @@
 </body>
 
 <script>
-	var WIDTH = 800;
-	var HEIGHT = 600;
+	var WIDTH = 1400;
+	var HEIGHT = 800;
 	var FPS = 50;
 
 	function ArrayList(){
@@ -198,8 +198,10 @@
 							if(cur.score > 2){
 								var accel = cur.accel + 0.1 * (Math.pow((2 * Math.random()) - 1, 7));
 								var speed = cur.speed + 4 * (Math.pow((2 * Math.random()) - 1, 7));
-								game.ents.add(new Player(cur.name, cur.pos, speed, accel, cur.lifespan));
-								console.log("New Player created with accel: " + accel + " Speed: " + speed);
+								var lifespan = cur.lifespan + 25 * (Math.pow((2 * Math.random()) - 1, 7));
+								game.ents.add(new Player(cur.name, cur.pos, speed, accel, lifespan));
+								console.log("New Player created with accel: " + accel + " Speed: " + speed + " Lifespan: " + lifespan);
+								cur.score = 0;
 							}
 						}
 					}
@@ -228,6 +230,7 @@
 	game.ents.add(new Dot(new Point(200, 200)));
 	game.ents.add(new Dot(new Point(400, 500)));
 	game.ents.add(new Dot(new Point(600, 100)));
+	game.ents.add(new Dot(new Point(150, 300)));
 	
 	////
 	
