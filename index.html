@@ -52,22 +52,24 @@
 			var count = 0;
 			var totspeed = 0;
 			var totaccel = 0;
+			var totlifes = 0;
 		
 			for(var i = 0; i < this.length; i ++){
 				if(this.array[i].type == "Player"){
 					var cur = this.array[i];
 					
 					g.fillStyle = cur.color;
-					g.fillText((cur.speed).toFixed(3) + "    " + (cur.accel).toFixed(3), 20, 40 + (20 * count));
+					g.fillText((cur.speed).toFixed(3) + "    " + (cur.accel).toFixed(3) + "    " + (cur.lifespan).toFixed(3), 20, 40 + (20 * count));
 					
 					totspeed += cur.speed;
 					totaccel += cur.accel;
+					totlifes += cur.lifespan;
 					count ++;
 				}
 			}
 			
 			g.fillStyle = "#101010";
-			g.fillText((totspeed / count).toFixed(3) + "    " + (totaccel / count).toFixed(3), 20, 20);
+			g.fillText((totspeed / count).toFixed(3) + "    " + (totaccel / count).toFixed(3) + "    " + (totlifes / count).toFixed(3), 20, 20);
 		}
 	}
 	
@@ -170,7 +172,7 @@
     
 	var WIDTH;
 	var HEIGHT;
-	var FPS = 10000;
+	var FPS = 100;
 	
 	var canvas = document.getElementById('draw');
 
