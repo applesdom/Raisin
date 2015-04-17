@@ -6,5 +6,4 @@ git remote add heroku https://git.heroku.com/raisinraisin.git
 
 #Then each time you want to push your changes to https://raisinraisin.herokuapp.com/, do this:
 
-
-
+git push heroku master
