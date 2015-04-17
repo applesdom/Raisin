@@ -97,9 +97,10 @@
 		}
 	}
 	
-	function Player(name, pos, speed, accel, lifespan){
+	function Player(name, color, pos, speed, accel, lifespan){
 		this.type = "Player";
 		this.name = name;
+		this.color = color;
 	
 		this.pos = pos;
 		this.vel = new Point(0, 0);
@@ -138,7 +139,7 @@
 		}
 		
 		this.render = function(g){
-			g.fillStyle = "#FF0000";
+			g.fillStyle = color;
 			g.fillRect(this.pos.x - 7.5, this.pos.y - 7.5, 15, 15);
 		}
 	}
@@ -200,12 +201,13 @@
 						if((nex.pos.sub(cur.pos)).mag() < 12){
 							nex.pos = new Point(Math.random() * WIDTH, Math.random() * HEIGHT);
 							cur.score ++;
+							cur.life -= 50;
 							
 							if(cur.score > 2){
 								var accel = cur.accel + 0.1 * (Math.pow((2 * Math.random()) - 1, 7));
 								var speed = cur.speed + 4 * (Math.pow((2 * Math.random()) - 1, 7));
 								var lifespan = cur.lifespan + 25 * (Math.pow((2 * Math.random()) - 1, 7));
-								game.ents.add(new Player(cur.name, cur.pos, speed, accel, lifespan));
+								game.ents.add(new Player(cur.name, cur.color, cur.pos, speed, accel, lifespan));
 								console.log("New Player created with accel: " + accel + " Speed: " + speed + " Lifespan: " + lifespan);
 								cur.score = 0;
 							}
@@ -232,11 +234,14 @@
 	////
 	var d = new Date();
 	
-	game.ents.add(new Player("Bill", new Point(100, 100), 4, 0.1, 500));
-	game.ents.add(new Dot(new Point(200, 200)));
-	game.ents.add(new Dot(new Point(400, 500)));
-	game.ents.add(new Dot(new Point(600, 100)));
-	game.ents.add(new Dot(new Point(150, 300)));
+	game.ents.add(new Player("Bloods", "#FF0000", new Point(100, 100), 4, 0.2, 400));
+	game.ents.add(new Player("Cryps", "#0000FF", new Point(1000, 600), 2, 0.05, 1000));
+	game.ents.add(new Dot(new Point(Math.random() * WIDTH, Math.random() * HEIGHT)));
+	game.ents.add(new Dot(new Point(Math.random() * WIDTH, Math.random() * HEIGHT)));
+	game.ents.add(new Dot(new Point(Math.random() * WIDTH, Math.random() * HEIGHT)));
+	game.ents.add(new Dot(new Point(Math.random() * WIDTH, Math.random() * HEIGHT)));
+	game.ents.add(new Dot(new Point(Math.random() * WIDTH, Math.random() * HEIGHT)));
+	game.ents.add(new Dot(new Point(Math.random() * WIDTH, Math.random() * HEIGHT)));
 	
 	////
 	
