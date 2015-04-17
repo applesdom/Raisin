@@ -18,14 +18,11 @@
   <script src="https://code.jquery.com/jquery-2.1.3.min.js">
   </script>
 
-<body>
-	<canvas id="draw" width="1600px" height="900px"></canvas>
+<body style="width:100%;height:100%;overflow:hidden;">
+	<canvas id="draw"></canvas>
 </body>
 
 <script>
-	var WIDTH = 800;
-	var HEIGHT = 600;
-	var FPS = 50;
 
 	function ArrayList(){
 		this.array = [];
@@ -148,12 +145,22 @@
 	}
 	
 	////
+    
+	var WIDTH;
+	var HEIGHT;
+	var FPS = 50;
 	
 	var canvas = document.getElementById('draw');
-	
-	canvas.width = WIDTH;
-	canvas.height = HEIGHT;
-	
+
+	canvas.width = WIDTH = $(window).width();
+	canvas.height = HEIGHT = $(window).height();
+
+	// updates canvas when window is resized
+	$(window).resize(function() {
+	  	canvas.width = WIDTH = $(window).width();
+		canvas.height = HEIGHT = $(window).height();
+	});
+		
 	var g = canvas.getContext('2d');
 	
 	////
