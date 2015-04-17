@@ -1,17 +1,16 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-  <title>New</title>
+  <title>Dot Stuff</title>
   <style>
     body {    
     margin: 0;
     padding: 0;
 	}
 	
-//	canvas {
-//		width:  100%;
-//		height: 100%;
-//		margin: 0px;
+	table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
 	}
   </style>
 
@@ -28,6 +27,32 @@
 	var HEIGHT = 600;
 	var FPS = 50;
 
+	function ArrayList(){
+		this.array = [];
+		this.length = 0;
+		
+		this.add = function(ob){
+			this.array[this.length] = ob;
+			this.length ++;
+		}
+		
+		this.index = function(ob){
+			return this.array.indexOf(ob);
+		}
+		
+		this.remove = function(ob){
+			for(var i = this.array.indexOf(ob); i < this.length - 1; i++){
+				this.array[i] = this.array[i + 1];
+			}
+			
+			this.length --;
+		}
+		
+		this.get = function(ind){
+			return this.array[ind];
+		}
+	}
+	
 	function Point(x, y){
 		this.y = y;
 		this.x = x;
@@ -55,6 +80,10 @@
 		this.toString = function(){
 			return x + ', ' + y;
 		}
+		
+		this.equals = function(p){
+			return (this.x == p.x) && (this.y == p.y);
+		}
 	}
 	
 	function Dot(pos){
@@ -72,30 +101,44 @@
 		}
 	}
 	
-	function Player(pos){
+	function Player(name, pos, speed, accel, lifespan){
 		this.type = "Player";
+		this.name = name;
 	
 		this.pos = pos;
 		this.vel = new Point(0, 0);
 		this.acc = new Point(0, 0);
 		
-		this.t = new Point(-1, -1);
+		this.speed = speed;
+		this.accel = accel;
+		this.lifespan = lifespan;
+		this.life = 0;
 		
-		this.speed = 4;
-		this.accel = 0.1;
+		this.t = new Point(-1, -1);
+
+		this.score = 0;
 		
 		this.tick = function(){
-			if(this.t.sub(-1, -1).mag() != 0){
+		
+			if(!this.t.equals(new Point(-1, -1))){
 			
 				this.acc = ((this.t.sub(this.pos)).mul((this.speed + (this.pos.sub(this.t)).mag() / 100) / (this.t.sub(this.pos)).mag())).sub(this.vel);
 			
 				if(this.acc.mag() > this.accel){this.acc = this.acc.scale(this.accel)};
+			}else{
+				this.acc = new Point(0, 0);
 			}
 			
 			this.vel = this.vel.add(this.acc);
 			if(this.vel.mag() > 10){this.vel = this.vel.scale(10);}
 			
 			this.pos = this.pos.add(this.vel);
+			if(this.pos.x < -100){this.pos.x = -100};
+			if(this.pos.y < -100){this.pos.y = -100};
+			if(this.pos.x > WIDTH + 100){this.pos.x = WIDTH + 100};
+			if(this.pos.y > HEIGHT + 100){this.pos.y = HEIGHT + 100};
+			
+			this.life ++;
 		}
 		
 		this.render = function(g){
@@ -117,7 +160,7 @@
 	
 	var game = {};
 	
-	game.ents = [];
+	game.ents = new ArrayList();
 	
 	game.run = function(){
 		game.tick();
@@ -126,18 +169,45 @@
 	
 	game.tick = function(){
 		for (i = 0; i < game.ents.length; i++){
-			var cur = game.ents[i];
+			var cur = game.ents.get(i);
 			cur.tick();
+			console.log();
 			
 			if(cur.type == "Player"){
+			
+				if(cur.life >= cur.lifespan){game.ents.remove(cur)};
+				
+				var mindis = 10000;
+				cur.t = new Point(-1, -1);
+			
 				for(j = 0; j < game.ents.length; j++){
-					var nex = game.ents[j];
+					var nex = game.ents.get(j);
 					
-					if(nex.type == "Dot" && (nex.pos.sub(cur.pos)).mag() < 12){
-						nex.pos = new Point(Math.random() * WIDTH, Math.random() * HEIGHT);
-						cur.t = nex.pos;
+					if(nex.type == "Dot"){
+						
+						
+						if((nex.pos.sub(cur.pos)).mag() < mindis){
+							cur.t = nex.pos;
+							mindis = nex.pos.sub(cur.pos).mag();
+						}
+						
+						if((nex.pos.sub(cur.pos)).mag() < 12){
+							nex.pos = new Point(Math.random() * WIDTH, Math.random() * HEIGHT);
+							cur.score ++;
+							
+							if(cur.score > 2){
+								var accel = cur.accel + 0.1 * (Math.pow((2 * Math.random()) - 1, 7));
+								var speed = cur.speed + 4 * (Math.pow((2 * Math.random()) - 1, 7));
+								game.ents.add(new Player(cur.name, cur.pos, speed, accel, cur.lifespan));
+								console.log("New Player created with accel: " + accel + " Speed: " + speed);
+							}
+						}
 					}
+					
+					
 				}
+				
+				
 			}
 		}
 	}
@@ -147,16 +217,17 @@
 		g.fillRect(0, 0, WIDTH, HEIGHT);
 		
 		for (i = 0; i < game.ents.length; i++){
-			game.ents[i].render(g);
+			game.ents.get(i).render(g);
 		}
 	}
 	
 	////
+	var d = new Date();
 	
-	bill = new Player(new Point(100, 100));
-	bill.t = new Point(200, 200);
-	game.ents[0] = bill;
-	game.ents[1] = new Dot(new Point(200, 200));
+	game.ents.add(new Player("Bill", new Point(100, 100), 4, 0.1, 500));
+	game.ents.add(new Dot(new Point(200, 200)));
+	game.ents.add(new Dot(new Point(400, 500)));
+	game.ents.add(new Dot(new Point(600, 100)));
 	
 	////
 	
