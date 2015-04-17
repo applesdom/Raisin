@@ -15,14 +15,23 @@
   </style>
 
 </head>
-  <script src="https://code.jquery.com/jquery-2.1.3.min.js">
-  </script>
+ <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5/dat.gui.min.js"></script>
 
 <body style="width:100%;height:100%;overflow:hidden;">
 	<canvas id="draw"></canvas>
 </body>
 
 <script>
+
+	/**
+	 * Returns a random integer between min (inclusive) and max (inclusive)
+	 * Using Math.round() will give you a non-uniform distribution!
+	 */
+	function getRandomInt(min, max) {
+	    return Math.floor(Math.random() * (max - min + 1)) + min;
+	}
+
 	function ArrayList(){
 		this.array = [];
 		this.length = 0;
@@ -122,7 +131,10 @@
 	function Player(name, color, pos, speed, accel, lifespan){
 		this.type = "Player";
 		this.name = name;
+
 		this.color = color;
+
+		this.size = 15;
 	
 		this.pos = pos;
 		this.vel = new Point(0, 0);
@@ -170,7 +182,6 @@
     
 	var WIDTH;
 	var HEIGHT;
-	var FPS = 10000;
 	
 	var canvas = document.getElementById('draw');
 
@@ -188,12 +199,22 @@
 	////
 	
 	var game = {};
+
+	game.FPS = 50;
+
+	// create gui object
+	game.gui = new dat.GUI();
+
+	game.gui.add(game,"FPS",1,100);
 	
 	game.ents = new ArrayList();
 	
 	game.run = function(){
 		game.tick();
 		game.render(g);
+
+		// continue the game loop
+		setTimeout(game.run, 1000 / game.FPS);
 	}
 	
 	game.tick = function(){
@@ -204,7 +225,10 @@
 			
 			if(cur.type == "Player"){
 			
-				if(cur.life >= cur.lifespan){game.ents.remove(cur)};
+				if(cur.life >= cur.lifespan){
+					game.ents.remove(cur);
+					game.gui.remove(cur.controller);
+				};
 				
 				var mindis = 10000;
 				cur.t = new Point(-1, -1);
@@ -228,8 +252,16 @@
 							if(cur.score > 2){
 								var accel = cur.accel + 0.1 * (Math.pow((2 * Math.random()) - 1, 7));
 								var speed = cur.speed + 4 * (Math.pow((2 * Math.random()) - 1, 7));
+
 								var lifespan = cur.lifespan + 25 * (Math.pow((2 * Math.random()) - 1, 7));
-								game.ents.add(new Player(cur.name, cur.color, cur.pos, speed, accel, lifespan));
+
+								var player = new Player(cur.name, cur.color, cur.pos, speed, accel, cur.lifespan);
+
+								// add gui control for size
+								player.controller = game.gui.add(player,"size",1,20);
+
+								game.ents.add(player);
+
 								console.log("New Player created with accel: " + accel + " Speed: " + speed + " Lifespan: " + lifespan);
 								cur.score = 0;
 							}
@@ -257,19 +289,39 @@
 	
 	////
 	var d = new Date();
+
+	// get current window dimensions
+	var w = $(window).width();
+	var h = $(window).height();
 	
-	game.ents.add(new Player("Bloods", "#FF0000", new Point(100, 100), 4, 0.2, 400));
-	game.ents.add(new Player("Cryps", "#0000FF", new Point(1000, 600), 2, 0.05, 1000));
-	game.ents.add(new Dot(new Point(Math.random() * WIDTH, Math.random() * HEIGHT)));
-	game.ents.add(new Dot(new Point(Math.random() * WIDTH, Math.random() * HEIGHT)));
-	game.ents.add(new Dot(new Point(Math.random() * WIDTH, Math.random() * HEIGHT)));
-	game.ents.add(new Dot(new Point(Math.random() * WIDTH, Math.random() * HEIGHT)));
-	game.ents.add(new Dot(new Point(Math.random() * WIDTH, Math.random() * HEIGHT)));
-	game.ents.add(new Dot(new Point(Math.random() * WIDTH, Math.random() * HEIGHT)));
+	// randomly positioned blood
+	var position = new Point(getRandomInt(1, w), getRandomInt(1,h));
+	var blood = new Player("Bloods", "#FF0000", position, 4, 0.2, 400);
+	
+	// add to game and gui control
+	blood.controller = game.gui.add(blood,"size",1,20);
+	game.ents.add(blood);
+
+	// randomly positioned crip
+	position = new Point(getRandomInt(1, w), getRandomInt(1,h));
+	var crip = new Player("Cryps", "#0000FF", position, 2, 0.05, 1000);
+	
+	// add to game and gui control
+	crip.controller = game.gui.add(crip,"size",1,20);
+	game.ents.add(crip);
+
+
+	game.ents.add(new Dot(new Point(getRandomInt(1, w), getRandomInt(1,h))));
+	game.ents.add(new Dot(new Point(getRandomInt(1, w), getRandomInt(1,h))));
+	game.ents.add(new Dot(new Point(getRandomInt(1, w), getRandomInt(1,h))));
+	game.ents.add(new Dot(new Point(getRandomInt(1, w), getRandomInt(1,h))));
+	game.ents.add(new Dot(new Point(getRandomInt(1, w), getRandomInt(1,h))));
+	game.ents.add(new Dot(new Point(getRandomInt(1, w), getRandomInt(1,h))));
 	
 	////
 	
-	game._intervalId = setInterval(game.run, 1000 / FPS);
+	// start the game loop
+	setTimeout(game.run, 1000 / game.FPS);
 	
 </script>
 
