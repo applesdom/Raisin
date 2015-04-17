@@ -47,6 +47,21 @@
 		this.get = function(ind){
 			return this.array[ind];
 		}
+		
+		this.render = function(g){
+			var temp = 0;
+		
+			for(var i = 0; i < this.length; i ++){
+				if(this.array[i].type == "Player"){
+					var cur = this.array[i];
+					
+					g.fillStyle = cur.color;
+					g.fillText((cur.speed).toFixed(3) + "    " + (cur.accel).toFixed(3), 20, 20 + (20 * temp));
+					
+					temp ++;
+				}
+			}
+		}
 	}
 	
 	function Point(x, y){
@@ -229,6 +244,8 @@
 		for (i = 0; i < game.ents.length; i++){
 			game.ents.get(i).render(g);
 		}
+		
+		game.ents.render(g);
 	}
 	
 	////
