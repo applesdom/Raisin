@@ -28,7 +28,7 @@
 	 * Returns a random integer between min (inclusive) and max (inclusive)
 	 * Using Math.round() will give you a non-uniform distribution!
 	 */
-	function getRandomInt(min, max) {
+	function random(min, max) {
 	    return Math.floor(Math.random() * (max - min + 1)) + min;
 	}
 
@@ -62,23 +62,33 @@
 			var totspeed = 0;
 			var totaccel = 0;
 			var totlifes = 0;
+			var totmutm = 0;
 		
 			for(var i = 0; i < this.length; i ++){
-				if(this.array[i].type == "Player"){
-					var cur = this.array[i];
-					
-					g.fillStyle = cur.color;
-					g.fillText((cur.speed).toFixed(3) + "    " + (cur.accel).toFixed(3) + "    " + (cur.lifespan).toFixed(3), 20, 40 + (20 * count));
-					
-					totspeed += cur.speed;
-					totaccel += cur.accel;
-					totlifes += cur.lifespan;
-					count ++;
+				var cur = this.array[i];
+				
+				var why = 40 + (20 * count);
+				var exe = 20;
+				while(why > HEIGHT - 15){
+					why -= HEIGHT + 10;
+					exe += 200;
 				}
+				
+				
+				g.fillStyle = cur.color;
+				g.fillText((cur.speed).toFixed(3) + "    " + (cur.accel).toFixed(3) + "    "
+					+ (cur.lifespan).toFixed(3) + "    " + (cur.mutm).toFixed(3), exe, why);
+				
+				totspeed += cur.speed;
+				totaccel += cur.accel;
+				totlifes += cur.lifespan;
+				totmutm += cur.mutm;
+				count ++;
 			}
 			
 			g.fillStyle = "#101010";
-			g.fillText((totspeed / count).toFixed(3) + "    " + (totaccel / count).toFixed(3) + "    " + (totlifes / count).toFixed(3), 20, 20);
+			g.fillText((totspeed / count).toFixed(3) + "    " + (totaccel / count).toFixed(3) + "    "
+				+ (totlifes / count).toFixed(3) + "    " + (totmutm / count).toFixed(3), 20, 20);
 		}
 	}
 	
@@ -130,7 +140,7 @@
 		}
 	}
 	
-	function Player(name, color, pos, speed, accel, lifespan){
+	function Player(name, color, pos, speed, accel, lifespan, mutm){
 		this.type = "Player";
 		this.name = name;
 
@@ -146,6 +156,7 @@
 		this.accel = accel;
 		this.lifespan = lifespan;
 		this.life = 0;
+		this.mutm = mutm;
 		
 		this.t = new Point(-1, -1);
 
@@ -155,7 +166,11 @@
 		
 			if(!this.t.equals(new Point(-1, -1))){
 			
-				this.acc = ((this.t.sub(this.pos)).mul((this.speed + (this.pos.sub(this.t)).mag() / 100) / (this.t.sub(this.pos)).mag())).sub(this.vel);
+				var traj = this.t.sub(this.pos);
+			
+				var temp = this.speed * (((traj.mag() * this.accel) / 150) + 1);
+			
+				this.acc = (traj.scale(temp)).sub(this.vel);
 			
 				if(this.acc.mag() > this.accel){this.acc = this.acc.scale(this.accel)};
 			}else{
@@ -184,6 +199,7 @@
     
 	var WIDTH;
 	var HEIGHT;
+	var FPS = 50;
 	
 	var canvas = document.getElementById('draw');
 
@@ -202,78 +218,81 @@
 	
 	var game = {};
 
-	game.FPS = 50;
+	game.speedmod = 1;
+	game.dotnumber = 6;
 
 	// create gui object
 	game.gui = new dat.GUI();
-
-	game.gui.add(game,"FPS",1,100);
+	
+	game.gui.add(game,"speedmod");
+	var listener = game.gui.add(game,"dotnumber");
+	
+	game.setDotNumber = function(n){
+		var dotcount = game.dots.length;
+		
+		while(dotcount < n){
+			game.dots.add(new Dot(new Point(random(1, WIDTH), random(1,HEIGHT))));
+			dotcount ++;
+		}
+		
+		while(dotcount > n){
+			game.dots.remove(game.dots.get(dotcount - 1));
+			dotcount --;
+		}
+	}
+	
+	listener.onFinishChange(function(value){
+		game.setDotNumber(value);
+	});
+	
+	var spawnfold = game.gui.addFolder('Add Player');
 	
 	game.ents = new ArrayList();
+	game.dots = new ArrayList();
 	
 	game.run = function(){
 		game.tick();
 		game.render(g);
 
 		// continue the game loop
-		setTimeout(game.run, 1000 / game.FPS);
+		setTimeout(game.run, 1000 / (FPS * game.speedmod));
 	}
 	
 	game.tick = function(){
 		for (i = 0; i < game.ents.length; i++){
 			var cur = game.ents.get(i);
 			cur.tick();
-			console.log();
+		
+			if(cur.life >= cur.lifespan){
+				game.ents.remove(cur);
+				continue;
+			}
 			
-			if(cur.type == "Player"){
+			var mindis = 10000;
+			cur.t = new Point(-1, -1);
+		
+			for(j = 0; j < game.dots.length; j++){
+				var nex = game.dots.get(j);
 			
-				if(cur.life >= cur.lifespan){
-					game.ents.remove(cur);
-					game.gui.remove(cur.controller);
-				};
-				
-				var mindis = 10000;
-				cur.t = new Point(-1, -1);
-			
-				for(j = 0; j < game.ents.length; j++){
-					var nex = game.ents.get(j);
-					
-					if(nex.type == "Dot"){
-						
-						
-						if((nex.pos.sub(cur.pos)).mag() < mindis){
-							cur.t = nex.pos;
-							mindis = nex.pos.sub(cur.pos).mag();
-						}
-						
-						if((nex.pos.sub(cur.pos)).mag() < 12){
-							nex.pos = new Point(Math.random() * WIDTH, Math.random() * HEIGHT);
-							cur.score ++;
-							cur.life -= 50;
-							
-							if(cur.score > 2){
-								var accel = cur.accel + 0.1 * (Math.pow((2 * Math.random()) - 1, 7));
-								var speed = cur.speed + 4 * (Math.pow((2 * Math.random()) - 1, 7));
-
-								var lifespan = cur.lifespan + 25 * (Math.pow((2 * Math.random()) - 1, 7));
-
-								var player = new Player(cur.name, cur.color, cur.pos, speed, accel, cur.lifespan);
-
-								// add gui control for size
-								player.controller = game.gui.add(player,"size",1,20);
-
-								game.ents.add(player);
-
-								console.log("New Player created with accel: " + accel + " Speed: " + speed + " Lifespan: " + lifespan);
-								cur.score = 0;
-							}
-						}
-					}
-					
-					
+				if((nex.pos.sub(cur.pos)).mag() < mindis){
+					cur.t = nex.pos;
+					mindis = nex.pos.sub(cur.pos).mag();
 				}
 				
-				
+				if((nex.pos.sub(cur.pos)).mag() < 12){
+					nex.pos = new Point(Math.random() * WIDTH, Math.random() * HEIGHT);
+					cur.score ++;
+					cur.life -= 50;
+					
+					if(cur.score > 2){
+						var accel = cur.accel + (cur.mutm / 20) * (Math.pow((2 * Math.random()) - 1, 5));
+						var speed = cur.speed + cur.mutm * (Math.pow((2 * Math.random()) - 1, 5));
+						var lifespan = cur.lifespan + (cur.mutm * 50) * (Math.pow((2 * Math.random()) - 1, 5));
+						var mutm = cur.mutm + (cur.mutm / 40) * (Math.pow((2 * Math.random()) - 1, 5));
+							game.ents.add(new Player(cur.name, cur.color, cur.pos, speed, accel, lifespan, mutm));
+							cur.score = 0;
+					}
+				}
 			}
 		}
 	}
@@ -286,44 +305,44 @@
 			game.ents.get(i).render(g);
 		}
 		
+		for (i = 0; i < game.dots.length; i++){
+			game.dots.get(i).render(g);
+		}
+		
 		game.ents.render(g);
 	}
 	
 	////
-	var d = new Date();
-
-	// get current window dimensions
-	var w = $(window).width();
-	var h = $(window).height();
 	
-	// randomly positioned blood
-	var position = new Point(getRandomInt(1, w), getRandomInt(1,h));
-	var blood = new Player("Bloods", "#FF0000", position, 4, 0.2, 400);
+	game.proto = new Player("Bill", "#FF0000", new Point(0, 0), 3, 0.1, 500, 1);
+	spawnfold.add(game.proto, "name");
+	spawnfold.add(game.proto, "color");
+	spawnfold.add(game.proto, "speed", 0, 20).step(0.5);
+	spawnfold.add(game.proto, "accel", 0, 1).step(0.05);
+	spawnfold.add(game.proto, "lifespan", 0, 2000).step(25);
+	spawnfold.add(game.proto, "mutm", 0, 2).step(0.1);
 	
-	// add to game and gui control
-	blood.controller = game.gui.add(blood,"size",1,20);
-	game.ents.add(blood);
-
-	// randomly positioned crip
-	position = new Point(getRandomInt(1, w), getRandomInt(1,h));
-	var crip = new Player("Cryps", "#0000FF", position, 2, 0.05, 1000);
 	
-	// add to game and gui control
-	crip.controller = game.gui.add(crip,"size",1,20);
-	game.ents.add(crip);
+	game.addPlayer = function(){
+		game.ents.add(new Player(game.proto.name, game.proto.color, new Point(random(0, WIDTH), random(0, HEIGHT)), game.proto.speed, game.proto.accel, game.proto.lifespan, game.proto.mutm));
+	}
 
+	spawnfold.add(game, 'addPlayer');
+	
+	////
 
-	game.ents.add(new Dot(new Point(getRandomInt(1, w), getRandomInt(1,h))));
-	game.ents.add(new Dot(new Point(getRandomInt(1, w), getRandomInt(1,h))));
-	game.ents.add(new Dot(new Point(getRandomInt(1, w), getRandomInt(1,h))));
-	game.ents.add(new Dot(new Point(getRandomInt(1, w), getRandomInt(1,h))));
-	game.ents.add(new Dot(new Point(getRandomInt(1, w), getRandomInt(1,h))));
-	game.ents.add(new Dot(new Point(getRandomInt(1, w), getRandomInt(1,h))));
+	game.dots.add(new Dot(new Point(random(1, WIDTH), random(1,HEIGHT))));
+	game.dots.add(new Dot(new Point(random(1, WIDTH), random(1,HEIGHT))));
+	game.dots.add(new Dot(new Point(random(1, WIDTH), random(1,HEIGHT))));
+	game.dots.add(new Dot(new Point(random(1, WIDTH), random(1,HEIGHT))));
+	game.dots.add(new Dot(new Point(random(1, WIDTH), random(1,HEIGHT))));
+	game.dots.add(new Dot(new Point(random(1, WIDTH), random(1,HEIGHT))));
 	
 	////
 	
 	// start the game loop
-	setTimeout(game.run, 1000 / game.FPS);
+	//setTimeout(game.run, 1000 / (FPS * game.speedmod));
+	game.run();
 	
 </script>
 
