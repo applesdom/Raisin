@@ -253,11 +253,19 @@
 	game.dots = new ArrayList();
 	
 	game.run = function(){
-		game.tick();
-		game.render(g);
-
-		// continue the game loop
-		setTimeout(game.run, 1000 / (FPS * game.speedmod));
+		if(game.speedmod != 0){
+		
+			game.tick();
+			game.render(g);
+	
+			// continue the game loop
+		
+			setTimeout(game.run, 1000 / (FPS * game.speedmod));
+		}else{
+			game.render(g);
+		
+			setTimeout(game.run, 100);
+		}
 	}
 	
 	game.tick = function(){
