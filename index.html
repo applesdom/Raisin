@@ -174,7 +174,8 @@
 			
 				if(this.acc.mag() > this.accel){this.acc = this.acc.scale(this.accel)};
 			}else{
-				this.acc = new Point(0, 0);
+				this.acc = (this.vel.mul(-1));
+				if(this.acc.mag() > this.accel){this.acc = this.acc.scale(this.accel)};
 			}
 			
 			this.vel = this.vel.add(this.acc);
@@ -319,7 +320,7 @@
 					if((nex.pos.sub(cur.pos)).mag() < 12){
 						game.ents.remove(nex);
 						cur.score += nex.score + 1;
-						cur.life -= 100;
+						cur.life -= 50;
 							
 						if(cur.score > 2){
 							var accel = cur.accel + 0.05 * (Math.pow((2 * Math.random()) - 1, 5));
