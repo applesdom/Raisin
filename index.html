@@ -130,6 +130,8 @@
 	
 		this.pos = pos;
 		
+		this.targets = 0;
+		
 		this.tick = function(){
 		
 		}
@@ -220,7 +222,7 @@
 	var game = {};
 
 	game.speedmod = 1;
-	game.dotnumber = 6;
+	game.dotnumber = 8;
 
 	// create gui object
 	game.gui = new dat.GUI();
@@ -280,18 +282,20 @@
 			}
 			
 			var mindis = 10000;
-			cur.t = new Point(-1, -1);
+			var target = -1;
 			
-			if(cur.diet == "Herb"){
+			if(cur.diet === "Herb"){
 				for(j = 0; j < game.dots.length; j++){
 					var nex = game.dots.get(j);
-				
-					if((nex.pos.sub(cur.pos)).mag() < mindis){
-						cur.t = nex.pos;
+					
+					var distance = (nex.pos.sub(cur.pos)).mag();
+					
+					if(distance + nex.targets < mindis){
+						target = nex;
 						mindis = nex.pos.sub(cur.pos).mag();
 					}
 					
-					if((nex.pos.sub(cur.pos)).mag() < 12){
+					if(distance < 12){
 						nex.pos = new Point(Math.random() * WIDTH, Math.random() * HEIGHT);
 						cur.score ++;
 						cur.life -= 50;
@@ -306,11 +310,17 @@
 						}
 					}
 				}
+				
+				if(target !== -1){
+					cur.t = target.pos;
+					target.targets += 1.5 * 11111.111 / (mindis + 11.111);
+				}
+				
 			}else{
 				for(j = 0; j < game.ents.length; j++){
 					var nex = game.ents.get(j);
 					
-					if(nex.diet == cur.diet){continue;}
+					if(nex.diet === cur.diet){continue;}
 				
 					if((nex.pos.sub(cur.pos)).mag() < mindis){
 						cur.t = nex.pos;
@@ -333,6 +343,10 @@
 					}
 				}
 			}
+		}
+		
+		for(j = 0; j < game.dots.length; j++){
+			game.dots.get(j).targets = 0;
 		}
 	}
 	
