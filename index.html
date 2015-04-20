@@ -145,8 +145,6 @@
 		this.name = name;
 
 		this.color = color;
-		// string for canvas to render, using Math.floor because doubles from gui don't work for some reason
-		this.colorstring = "rgba(" + Math.floor(color[0]) + "," + Math.floor(color[1]) + "," + Math.floor(color[2]) + "," + color[3] + ")";
 		
 		this.size = 15;
 	
@@ -192,7 +190,7 @@
 		}
 		
 		this.render = function(g){
-			g.fillStyle = this.colorstring;
+			g.fillStyle = this.color;
 			g.fillRect(this.pos.x - 7.5, this.pos.y - 7.5, this.size, this.size);
 		}
 	}
@@ -226,8 +224,8 @@
 	// create gui object
 	game.gui = new dat.GUI();
 	
-	game.gui.add(game,"speedmod",1,10);
-	var listener = game.gui.add(game,"dotnumber",1,100);
+	game.gui.add(game,"speedmod",0,5).step(0.5);
+	var listener = game.gui.add(game,"dotnumber",1,100).step(1);;
 	
 	game.setDotNumber = function(n){
 		var dotcount = game.dots.length;
@@ -251,6 +249,8 @@
 	
 	game.ents = new ArrayList();
 	game.dots = new ArrayList();
+	
+	spawnfold.open;
 	
 	game.run = function(){
 		if(game.speedmod != 0){
@@ -323,16 +323,15 @@
 	}
 	
 	////
-	var color = [ 255, 0, 0 , 0.5]; // RGB with alpha
-	game.proto = new Player("Bill", color, new Point(0, 0), 3, 0.1, 500, 1);
+	
+	game.proto = new Player("Bill", "#FF0000", new Point(0, 0), 3, 0.1, 500, 1);
 
-	spawnfold.add(game.proto, "name");
+	//spawnfold.add(game.proto, "name");
+	spawnfold.addColor(game.proto, "color");
 	spawnfold.add(game.proto, "speed", 0, 20).step(0.5);
-	spawnfold.add(game.proto, "accel", 0, 1).step(0.05);
+	spawnfold.add(game.proto, "accel", 0, 2).step(0.05);
 	spawnfold.add(game.proto, "lifespan", 0, 2000).step(25);
 	spawnfold.add(game.proto, "mutm", 0, 2).step(0.1);
-
-	spawnfold.addColor(game.proto, "color");
 	
 	game.addPlayer = function(){
 		game.ents.add(new Player(game.proto.name, game.proto.color, new Point(random(0, WIDTH), random(0, HEIGHT)), game.proto.speed, game.proto.accel, game.proto.lifespan, game.proto.mutm));
