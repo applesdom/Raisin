@@ -3,10 +3,12 @@ var express = require('express');
 var app = express();
 
 var http = require('http');
+var path = require('path');
 
 app.set('views', __dirname + '/');
 app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'html');
+app.use(express.static(path.join(__dirname,'/')));
 
 //app.use(express.static(path.join(__dirname, 'public')));
 
