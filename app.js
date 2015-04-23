@@ -15,6 +15,14 @@ app.get('/', function (req, res) {
   res.render('index.html');
 });
 
+app.get('/test', function (req, res) {
+  res.render('test.html');
+});
+
+app.get('/dots', function (req, res) {
+  res.render('dots.html');
+});
+
 var port = process.env.PORT || 3000;
 
 http.createServer(app).listen(port, function(){

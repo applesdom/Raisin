@@ -1,0 +1,402 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>Dot Stuff</title>
+  <style>
+    body {    
+    margin: 0;
+    padding: 0;
+	}
+	
+	table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+	}
+  </style>
+
+</head>
+ <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5/dat.gui.min.js"></script>
+
+<body style="width:100%;height:100%;overflow:hidden;">
+	<canvas id="draw"></canvas>
+</body>
+
+<script>
+
+	/**
+	 * Returns a random integer between min (inclusive) and max (inclusive)
+	 * Using Math.round() will give you a non-uniform distribution!
+	 */
+	function random(min, max) {
+	    return Math.floor(Math.random() * (max - min + 1)) + min;
+	}
+
+	function ArrayList(){
+		this.array = [];
+		this.length = 0;
+		
+		this.add = function(ob){
+			this.array[this.length] = ob;
+			this.length ++;
+		}
+		
+		this.index = function(ob){
+			return this.array.indexOf(ob);
+		}
+		
+		this.remove = function(ob){
+			for(var i = this.array.indexOf(ob); i < this.length - 1; i++){
+				this.array[i] = this.array[i + 1];
+			}
+			
+			this.length --;
+		}
+		
+		this.get = function(ind){
+			return this.array[ind];
+		}
+		
+		this.render = function(g){
+			var count = 0;
+			var totspeed = 0;
+			var totaccel = 0;
+			var totlifes = 0;
+		
+			for(var i = 0; i < this.length; i ++){
+				var cur = this.array[i];
+				
+				var why = 60 + (20 * count);
+				var exe = 20;
+				while(why > HEIGHT - 15){
+					why -= HEIGHT + 10;
+					exe += 175;
+				}
+				
+				
+				g.fillStyle = cur.color;
+				g.fillText((cur.speed).toFixed(3) + "      " + (cur.accel).toFixed(3) + "      "
+					+ (cur.lifespan).toFixed(3), exe, why);
+				
+				totspeed += cur.speed;
+				totaccel += cur.accel;
+				totlifes += cur.lifespan;
+				count ++;
+			}
+			
+			g.fillStyle = "#101010";
+			g.fillText("Speed:    Accel:    Lifespan:", 20, 20);
+			
+			g.fillText((totspeed / count).toFixed(3) + "      " + (totaccel / count).toFixed(3) + "      "
+				+ (totlifes / count).toFixed(3), 20, 40);
+		}
+	}
+	
+	function Point(x, y){
+		this.y = y;
+		this.x = x;
+		
+		this.mag = function(){
+			return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+		}
+		
+		this.add = function(p){
+			return new Point(this.x + p.x, this.y + p.y);
+		}
+		
+		this.sub = function(p){
+			return new Point(this.x - p.x, this.y - p.y);
+		}
+		
+		this.mul = function(s){
+			return new Point(this.x * s, this.y * s);
+		}
+		
+		this.scale = function(s){
+			return new Point((s / this.mag()) * this.x, (s / this.mag()) * this.y);
+		}
+		
+		this.toString = function(){
+			return x + ', ' + y;
+		}
+		
+		this.equals = function(p){
+			return (this.x == p.x) && (this.y == p.y);
+		}
+	}
+	
+	function Dot(pos){
+		this.type = "Dot";
+	
+		this.pos = pos;
+		
+		this.targets = 0;
+		
+		this.tick = function(){
+		
+		}
+		
+		this.render = function(g){
+			g.fillStyle = "#D0D000";
+			g.fillRect(this.pos.x - 4, this.pos.y - 4, 8, 8);
+		}
+	}
+	
+	function Player(name, color, pos, speed, accel, lifespan, diet){
+		this.type = "Player";
+		this.name = name;
+
+		this.color = color;
+		
+		this.size = 15;
+	
+		this.pos = pos;
+		this.vel = new Point(0, 0);
+		this.acc = new Point(0, 0);
+		
+		this.speed = speed;
+		this.accel = accel;
+		this.lifespan = lifespan;
+		this.life = 0;
+		this.diet = diet;
+		
+		this.t = new Point(-1, -1);
+
+		this.score = 0;
+		
+		this.tick = function(){
+		
+			if(!this.t.equals(new Point(-1, -1))){
+			
+				var traj = this.t.sub(this.pos);
+			
+				var temp = this.speed * (((traj.mag() * this.accel) / 150) + 1);
+			
+				this.acc = (traj.scale(temp)).sub(this.vel);
+			
+				if(this.acc.mag() > this.accel){this.acc = this.acc.scale(this.accel)};
+			}else{
+				this.acc = (this.vel.mul(-1));
+				if(this.acc.mag() > this.accel){this.acc = this.acc.scale(this.accel)};
+			}
+			
+			this.vel = this.vel.add(this.acc);
+			if(this.vel.mag() > 10){this.vel = this.vel.scale(10);}
+			
+			this.pos = this.pos.add(this.vel);
+			if(this.pos.x < -100){this.pos.x = -100};
+			if(this.pos.y < -100){this.pos.y = -100};
+			if(this.pos.x > WIDTH + 100){this.pos.x = WIDTH + 100};
+			if(this.pos.y > HEIGHT + 100){this.pos.y = HEIGHT + 100};
+			
+			this.life ++;
+		}
+		
+		this.render = function(g){
+			g.fillStyle = this.color;
+			g.fillRect(this.pos.x - 7.5, this.pos.y - 7.5, this.size, this.size);
+		}
+	}
+	
+	////
+    
+	var WIDTH;
+	var HEIGHT;
+	var FPS = 50;
+	
+	var canvas = document.getElementById('draw');
+
+	canvas.width = WIDTH = $(window).width();
+	canvas.height = HEIGHT = $(window).height();
+
+	// updates canvas when window is resized
+	$(window).resize(function() {
+	  	canvas.width = WIDTH = $(window).width();
+		canvas.height = HEIGHT = $(window).height();
+	});
+		
+	var g = canvas.getContext('2d');
+	
+	////
+	
+	var game = {};
+
+	game.speedmod = 1;
+	game.dotnumber = 8;
+
+	// create gui object
+	game.gui = new dat.GUI();
+	
+	game.gui.add(game,"speedmod",0,5).step(0.5);
+	var listener = game.gui.add(game,"dotnumber",0,100).step(1);;
+	
+	game.setDotNumber = function(n){
+		var dotcount = game.dots.length;
+		
+		while(dotcount < n){
+			game.dots.add(new Dot(new Point(random(1, WIDTH), random(1,HEIGHT))));
+			dotcount ++;
+		}
+		
+		while(dotcount > n){
+			game.dots.remove(game.dots.get(dotcount - 1));
+			dotcount --;
+		}
+	}
+	
+	listener.onFinishChange(function(value){
+		game.setDotNumber(value);
+	});
+	
+	var spawnfold = game.gui.addFolder('Add Player');
+	
+	game.ents = new ArrayList();
+	game.dots = new ArrayList();
+	
+	spawnfold.open;
+	
+	game.run = function(){
+		if(game.speedmod != 0){
+		
+			game.tick();
+			game.render(g);
+	
+			// continue the game loop
+		
+			setTimeout(game.run, 1000 / (FPS * game.speedmod));
+		}else{
+			game.render(g);
+		
+			setTimeout(game.run, 100);
+		}
+	}
+	
+	game.tick = function(){
+		for (i = 0; i < game.ents.length; i++){
+			var cur = game.ents.get(i);
+			cur.tick();
+		
+			if(cur.life >= cur.lifespan){
+				game.ents.remove(cur);
+				continue;
+			}
+			
+			var mindis = 10000;
+			var target = -1;
+			
+			if(cur.diet === "Herb"){
+				for(j = 0; j < game.dots.length; j++){
+					var nex = game.dots.get(j);
+					
+					var distance = (nex.pos.sub(cur.pos)).mag();
+					
+					if(distance + nex.targets < mindis){
+						target = nex;
+						mindis = nex.pos.sub(cur.pos).mag();
+					}
+					
+					if(distance < 12){
+						nex.pos = new Point(Math.random() * WIDTH, Math.random() * HEIGHT);
+						cur.score ++;
+						cur.life -= 50;
+							
+						if(cur.score > 2){
+							var accel = cur.accel + 0.05 * (Math.pow((2 * Math.random()) - 1, 5));
+							var speed = cur.speed + 1 * (Math.pow((2 * Math.random()) - 1, 5));
+							var lifespan = cur.lifespan + 50 * (Math.pow((2 * Math.random()) - 1, 5));
+							
+							game.ents.add(new Player(cur.name, cur.color, cur.pos, speed, accel, lifespan, cur.diet));
+							cur.score = 0;
+						}
+					}
+				}
+				
+				if(target !== -1){
+					cur.t = target.pos;
+					target.targets += 1.5 * 11111.111 / (mindis + 11.111);
+				}
+				
+			}else{
+				for(j = 0; j < game.ents.length; j++){
+					var nex = game.ents.get(j);
+					
+					if(nex.diet === cur.diet){continue;}
+				
+					if((nex.pos.sub(cur.pos)).mag() < mindis){
+						cur.t = nex.pos;
+						mindis = nex.pos.sub(cur.pos).mag();
+					}
+					
+					if((nex.pos.sub(cur.pos)).mag() < 12){
+						game.ents.remove(nex);
+						cur.score += nex.score + 1;
+						cur.life -= 50;
+							
+						if(cur.score > 2){
+							var accel = cur.accel + 0.05 * (Math.pow((2 * Math.random()) - 1, 5));
+							var speed = cur.speed + 1 * (Math.pow((2 * Math.random()) - 1, 5));
+							var lifespan = cur.lifespan + 50 * (Math.pow((2 * Math.random()) - 1, 5));
+							
+							game.ents.add(new Player(cur.name, cur.color, cur.pos, speed, accel, lifespan, cur.diet));
+							cur.score = 0;
+						}
+					}
+				}
+			}
+		}
+		
+		for(j = 0; j < game.dots.length; j++){
+			game.dots.get(j).targets = 0;
+		}
+	}
+	
+	game.render = function(g){
+		g.fillStyle = "#F0F0F0";
+		g.fillRect(0, 0, WIDTH, HEIGHT);
+		
+		for (i = 0; i < game.ents.length; i++){
+			game.ents.get(i).render(g);
+		}
+		
+		for (i = 0; i < game.dots.length; i++){
+			game.dots.get(i).render(g);
+		}
+		
+		game.ents.render(g);
+	}
+	
+	////
+	
+	game.proto = new Player("Bill", "#FF0000", new Point(0, 0), 3, 0.1, 500, 'Herb');
+
+	//spawnfold.add(game.proto, "name");
+	spawnfold.addColor(game.proto, "color");
+	spawnfold.add(game.proto, "speed", 0, 20).step(0.5);
+	spawnfold.add(game.proto, "accel", 0, 2).step(0.05);
+	spawnfold.add(game.proto, "lifespan", 0, 2000).step(25);
+	spawnfold.add(game.proto, "diet", [ 'Herb', 'Carn'] );
+	
+	game.addPlayer = function(){
+		game.ents.add(new Player(game.proto.name, game.proto.color, new Point(random(0, WIDTH), random(0, HEIGHT)), game.proto.speed, game.proto.accel, game.proto.lifespan, game.proto.diet));
+	}
+
+	spawnfold.add(game, 'addPlayer');
+	
+	////
+
+	game.dots.add(new Dot(new Point(random(1, WIDTH), random(1,HEIGHT))));
+	game.dots.add(new Dot(new Point(random(1, WIDTH), random(1,HEIGHT))));
+	game.dots.add(new Dot(new Point(random(1, WIDTH), random(1,HEIGHT))));
+	game.dots.add(new Dot(new Point(random(1, WIDTH), random(1,HEIGHT))));
+	game.dots.add(new Dot(new Point(random(1, WIDTH), random(1,HEIGHT))));
+	game.dots.add(new Dot(new Point(random(1, WIDTH), random(1,HEIGHT))));
+	
+	////
+	
+	// start the game loop
+	//setTimeout(game.run, 1000 / (FPS * game.speedmod));
+	game.run();
+	
+</script>
+
+</html>

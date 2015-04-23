@@ -1,0 +1,156 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Physics</title>
+	
+	<style>
+		body {    
+			margin: 10;
+			padding: 0;
+		}
+		table, th, td {
+		   border: 1px solid black;
+		}
+		table {
+			border-collapse: collapse;
+		}
+	</style>
+
+</head>
+
+<body style="width:100%;height:100%;overflow-x:hidden;">
+	<form>
+		Start position:<br>
+		<input type="number" id="spos" value="8" style="margin:5px"><br>
+		Start velocity:<br>
+		<input type="number" id="svel" value="0" style="margin:5px"><br>
+		Interval (dt):<br>
+		<input type="number" id="interval" value="0.1" style="margin:5px"><br>
+		
+		<input type="button" onclick="run()" value="Run" style="margin:15px">
+	</form>
+	
+	<canvas id="canvas" width=1000 height=400></canvas>
+	
+	<div style="margin:10px">
+		<table>
+			<thead>
+				<th>t</th>
+				<th>pos (x)</th>
+				<th>vel (dx/dt)</th>
+				<th>acc (dx2/dt2)</th>
+			</thead>
+			<tbody id="output">
+			</tbody>
+		</table>
+	</div>
+</body>
+
+<script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+
+<script>
+	var spos = document.getElementById("spos");
+	var svel = document.getElementById("svel");
+	var interval = document.getElementById("interval");
+	
+	var canvas = document.getElementById("canvas");
+	var g = canvas.getContext('2d');
+	
+	var t;
+	var pos;
+	var vel;
+	var acc;
+	
+	drawGrid();
+	
+	function run(){
+		go = false;
+	
+		t = 0;
+		inter = interval.value;
+		pos = 1 * spos.value;
+		vel = 1 * svel.value;
+		acc = -pos;
+		
+		drawGrid();
+		$('#output').empty();
+	
+		g.strokeStyle = '#ff0000';
+		g.beginPath();
+		g.moveTo(conX(t * 100), conY(pos * 20));
+		
+		go = true;
+		
+		tick();
+	}
+	
+	function tick(){
+		var html = "<tr><td>" + t.toFixed(3) + "</td><td>" + pos.toFixed(3) + "</td><td>" + vel.toFixed(3) + "</td><td>" + acc.toFixed(3) + "</td></tr>";
+		$('#output').append( html );
+	
+		acc = -pos;
+		vel += acc * inter;
+		pos += vel * inter;
+		
+		t+= 1 * inter;
+		
+		g.lineTo(conX(t * 100), conY(pos * 20));
+		g.stroke();
+		
+		if((go && t < 10) || t === 0){
+			setTimeout(tick, 0);
+		}
+	}
+	
+	function drawGrid(){
+		g.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
+	
+		g.strokeStyle = '#000000';
+		g.lineWidth = 3;
+	
+		g.beginPath();
+		g.moveTo(conX(0), conY(canvas.offsetHeight / 2));
+		g.lineTo(conX(0), conY(-canvas.offsetHeight / 2));
+		g.stroke();
+		
+		g.moveTo(conX(-10), conY(0));
+		g.lineTo(conX(canvas.offsetWidth), conY(0));
+		g.stroke();
+		
+		g.lineWidth = 2;
+		
+		for(var i = 1; i <= 9; i ++){
+			g.moveTo(conX(i * 100), conY(10));
+			g.lineTo(conX(i * 100), conY(-10));
+			g.stroke();
+			
+			g.fillText(i, conX((i * 100) + 4), conY(-14));
+		}
+		
+		for(var i = 9; i >= -9; i --){
+			if(i === 0){continue;}
+			
+			g.moveTo(conX(-10), conY(20 * i));
+			g.lineTo(conX(10), conY(20 * i));
+			g.stroke();
+			
+			g.fillText(i, conX(14), conY((20 * i) - 4));
+		}
+		
+		g.lineWidth = 3;
+	}
+	
+	function conX(x){
+		return (x) + 10;
+	}
+	
+	function conY(y){
+		return (canvas.offsetHeight / 2) - (y);
+	}
+	
+	function setGo(){
+		go = true;
+	}
+</script>
+
+</html>
