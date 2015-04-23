@@ -20,17 +20,30 @@
 
 <body style="width:100%;height:100%;overflow-x:hidden;">
 	<form>
+		Max pos:<br>
+		<input type="number" id="maxy" value="10" style="margin:5px"><br>
+		Min pos:<br>
+		<input type="number" id="miny" value="-10" style="margin:5px"><br>
+		Max t:<br>
+		<input type="number" id="maxt" value="10" min="0" step=".1" style="margin:5px"><br>
+	</form>
+	
+	<br><br><br>
+	
+	<form>
 		Start position:<br>
-		<input type="number" id="spos" value="8" style="margin:5px"><br>
+		<input type="number" id="spos" value="0" style="margin:5px"><br>
 		Start velocity:<br>
 		<input type="number" id="svel" value="0" style="margin:5px"><br>
 		Interval (dt):<br>
 		<input type="number" id="interval" value="0.1" min="0" step=".1" style="margin:5px"><br>
+		Acceleration (use 'pos' for x position):<br>
+		<textarea id="accel" style="margin:5px">-pos</textarea><br>
 		
 		<input type="button" onclick="run()" value="Run" style="margin:15px">
 	</form>
 	
-	<canvas id="canvas" width=1000 height=400></canvas>
+	<canvas id="canvas" width=800 height=400></canvas>
 	
 	<div style="margin:10px">
 		<table>
@@ -52,6 +65,11 @@
 	var spos = document.getElementById("spos");
 	var svel = document.getElementById("svel");
 	var interval = document.getElementById("interval");
+	var accel = document.getElementById("accel");
+	
+	var maxy = document.getElementById("maxy").value;
+	var miny = document.getElementById("miny").value;
+	var maxt = document.getElementById("maxt").value;
 	
 	var canvas = document.getElementById("canvas");
 	var g = canvas.getContext('2d');
@@ -65,25 +83,27 @@
 	
 	function run(){
 
-		if (interval.value <= 0) {
-			alert("Invalid interval");
+		if (interval.value === 0) {
+			alert("Don't play games with me.");
 			return;
 		}
 		
 		go = false;
+		
+		accref = accel.value;
 	
 		t = 0;
 		inter = interval.value;
 		pos = 1 * spos.value;
 		vel = 1 * svel.value;
-		acc = -pos;
+		acc = eval(accref);
 		
 		drawGrid();
 		$('#output').empty();
 	
 		g.strokeStyle = '#ff0000';
 		g.beginPath();
-		g.moveTo(conX(t * 100), conY(pos * 20));
+		g.moveTo(conX(0), conY(pos));
 		
 		go = true;
 		
@@ -94,13 +114,13 @@
 		var html = "<tr><td>" + t.toFixed(3) + "</td><td>" + pos.toFixed(3) + "</td><td>" + vel.toFixed(3) + "</td><td>" + acc.toFixed(3) + "</td></tr>";
 		$('#output').append( html );
 	
-		acc = -pos;
+		acc = eval(accref);
 		vel += acc * inter;
 		pos += vel * inter;
 		
 		t+= 1 * inter;
 		
-		g.lineTo(conX(t * 100), conY(pos * 20));
+		g.lineTo(conX(t), conY(pos));
 		g.stroke();
 		
 		if((go && t < 10) || t === 0){
@@ -108,54 +128,62 @@
 		}
 	}
 	
+	function getAccel(){
+		return accel.innerHTML;
+	}
+	
 	function drawGrid(){
+		maxy = document.getElementById("maxy").value;
+		miny = document.getElementById("miny").value;
+		maxt = document.getElementById("maxt").value;
+	
 		g.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
 	
 		g.strokeStyle = '#000000';
 		g.lineWidth = 3;
 	
 		g.beginPath();
-		g.moveTo(conX(0), conY(canvas.offsetHeight / 2));
-		g.lineTo(conX(0), conY(-canvas.offsetHeight / 2));
+		g.moveTo(conX(0), conY(maxy));
+		g.lineTo(conX(0), conY(miny));
 		g.stroke();
 		
-		g.moveTo(conX(-10), conY(0));
-		g.lineTo(conX(canvas.offsetWidth), conY(0));
+		g.moveTo(0, conY(0));
+		g.lineTo(conX(maxt), conY(0));
 		g.stroke();
 		
 		g.lineWidth = 2;
 		
-		for(var i = 1; i <= 9; i ++){
-			g.moveTo(conX(i * 100), conY(10));
-			g.lineTo(conX(i * 100), conY(-10));
+		for(var i = 1; i < maxt; i ++){
+			g.moveTo(conX(i), conY(0) - 10);
+			g.lineTo(conX(i), conY(0) + 10);
 			g.stroke();
 			
-			g.fillText(i, conX((i * 100) + 4), conY(-14));
+			if(conY(0) + 14 < canvas.offsetHeight){
+				g.fillText(i, conX(i) + 4, conY(0) + 12);
+			}else{
+				g.fillText(i, conX(i) + 4, conY(0) - 6);
+			}
 		}
 		
-		for(var i = 9; i >= -9; i --){
+		for(var i = maxy - 1; i > miny; i --){
 			if(i === 0){continue;}
 			
-			g.moveTo(conX(-10), conY(20 * i));
-			g.lineTo(conX(10), conY(20 * i));
+			g.moveTo(conX(0) - 10, conY(i));
+			g.lineTo(conX(0) + 10, conY(i));
 			g.stroke();
 			
-			g.fillText(i, conX(14), conY((20 * i) - 4));
+			g.fillText(i, conX(0) + 12, conY(i) + 4);
 		}
 		
 		g.lineWidth = 3;
 	}
 	
 	function conX(x){
-		return (x) + 10;
+		return 10 + ((x / maxt) * (canvas.offsetWidth - 10));
 	}
 	
 	function conY(y){
-		return (canvas.offsetHeight / 2) - (y);
-	}
-	
-	function setGo(){
-		go = true;
+		return canvas.offsetHeight * (1 - ((y - miny) / (maxy - miny)));
 	}
 </script>
 
