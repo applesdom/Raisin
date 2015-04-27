@@ -107,12 +107,18 @@
 		
 		go = true;
 		
+		while((go && t < 10) || t === 0){
+			
+		}
+		
 		tick();
 	}
 	
 	function tick(){
 		var html = "<tr><td>" + t.toFixed(3) + "</td><td>" + pos.toFixed(3) + "</td><td>" + vel.toFixed(3) + "</td><td>" + acc.toFixed(3) + "</td></tr>";
 		$('#output').append( html );
+		
+		console.log(maxy);
 	
 		acc = eval(accref);
 		vel += acc * inter;
@@ -126,10 +132,6 @@
 		if((go && t < 10) || t === 0){
 			setTimeout(tick, 0);
 		}
-	}
-	
-	function getAccel(){
-		return accel.innerHTML;
 	}
 	
 	function drawGrid(){

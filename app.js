@@ -25,6 +25,10 @@ app.get('/dots', function (req, res) {
   res.render('dots.html');
 });
 
+app.get('/calc', function (req, res) {
+  res.render('calc.html');
+});
+
 var port = process.env.PORT || 3000;
 
 http.createServer(app).listen(port, function(){
