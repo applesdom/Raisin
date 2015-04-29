@@ -1,192 +1,161 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-	<title>Physics</title>
+	<title>Missile</title>
 	
 	<style>
 		body {    
 			margin: 10;
 			padding: 0;
-		}
-		table, th, td {
-		   border: 1px solid black;
-		}
-		table {
-			border-collapse: collapse;
+			display: block;
 		}
 	</style>
 
 </head>
 
 <body style="width:100%;height:100%;overflow-x:hidden;">
-	<form>
-		Max pos:<br>
-		<input type="number" id="maxy" value="10" style="margin:5px"><br>
-		Min pos:<br>
-		<input type="number" id="miny" value="-10" style="margin:5px"><br>
-		Max t:<br>
-		<input type="number" id="maxt" value="10" min="0" step=".1" style="margin:5px"><br>
-	</form>
-	
-	<br><br><br>
-	
-	<form>
-		Start position:<br>
-		<input type="number" id="spos" value="0" style="margin:5px"><br>
-		Start velocity:<br>
-		<input type="number" id="svel" value="0" style="margin:5px"><br>
-		Interval (dt):<br>
-		<input type="number" id="interval" value="0.1" min="0" step=".1" style="margin:5px"><br>
-		Acceleration (use 'pos' for x position):<br>
-		<textarea id="accel" style="margin:5px">-pos</textarea><br>
-		
-		<input type="button" onclick="run()" value="Run" style="margin:15px">
-	</form>
-	
-	<canvas id="canvas" width=800 height=400></canvas>
-	
-	<div style="margin:10px">
-		<table>
-			<thead>
-				<th>t</th>
-				<th>pos (x)</th>
-				<th>vel (dx/dt)</th>
-				<th>acc (dx2/dt2)</th>
-			</thead>
-			<tbody id="output">
-			</tbody>
-		</table>
+	<div>
+		<input type="button" onclick="resetMissile()" value="Reset Missile" style="margin:5px;">
+		<textarea id="input" style="margin:5px; width:400px;">((target.pos.sub(this.pos)).scale(4)).sub(this.vel)</textarea><br>
 	</div>
+
+	<canvas id="canvas" width=800 height=600></canvas>
 </body>
 
 <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
 
 <script>
-	var spos = document.getElementById("spos");
-	var svel = document.getElementById("svel");
-	var interval = document.getElementById("interval");
-	var accel = document.getElementById("accel");
-	
-	var maxy = document.getElementById("maxy").value;
-	var miny = document.getElementById("miny").value;
-	var maxt = document.getElementById("maxt").value;
-	
-	var canvas = document.getElementById("canvas");
-	var g = canvas.getContext('2d');
-	
-	var t;
-	var pos;
-	var vel;
-	var acc;
-	
-	drawGrid();
-	
-	function run(){
-
-		if (interval.value === 0) {
-			alert("Don't play games with me.");
-			return;
+	function Point(x, y){
+		this.y = y;
+		this.x = x;
+		
+		this.mag = function(){
+			return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
 		}
 		
-		go = false;
-		
-		accref = accel.value;
-	
-		t = 0;
-		inter = interval.value;
-		pos = 1 * spos.value;
-		vel = 1 * svel.value;
-		acc = eval(accref);
-		
-		drawGrid();
-		$('#output').empty();
-	
-		g.strokeStyle = '#ff0000';
-		g.beginPath();
-		g.moveTo(conX(0), conY(pos));
-		
-		go = true;
-		
-		while((go && t < 10) || t === 0){
-			
+		this.add = function(p){
+			return new Point(this.x + p.x, this.y + p.y);
 		}
 		
-		tick();
-	}
-	
-	function tick(){
-		var html = "<tr><td>" + t.toFixed(3) + "</td><td>" + pos.toFixed(3) + "</td><td>" + vel.toFixed(3) + "</td><td>" + acc.toFixed(3) + "</td></tr>";
-		$('#output').append( html );
+		this.sub = function(p){
+			return new Point(this.x - p.x, this.y - p.y);
+		}
 		
-		console.log(maxy);
-	
-		acc = eval(accref);
-		vel += acc * inter;
-		pos += vel * inter;
+		this.mul = function(s){
+			return new Point(this.x * s, this.y * s);
+		}
 		
-		t+= 1 * inter;
+		this.scale = function(s){
+			return new Point((s / this.mag()) * this.x, (s / this.mag()) * this.y);
+		}
 		
-		g.lineTo(conX(t), conY(pos));
-		g.stroke();
+		this.toString = function(){
+			return x.toFixed(4) + ', ' + y.toFixed(4);
+		}
 		
-		if((go && t < 10) || t === 0){
-			setTimeout(tick, 0);
+		this.equals = function(p){
+			return (this.x == p.x) && (this.y == p.y);
 		}
 	}
 	
-	function drawGrid(){
-		maxy = document.getElementById("maxy").value;
-		miny = document.getElementById("miny").value;
-		maxt = document.getElementById("maxt").value;
+	function Dot(x, y){
+		var SIZE = 8
 	
-		g.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
+		this.pos = new Point(x, y);
+		
+		this.tick = function(){
+		
+		}
+		
+		this.render = function(){
+			g.fillStyle = "#C0C010";
+			g.fillRect(this.pos.x - (SIZE / 2), this.pos.y - (SIZE / 2), SIZE, SIZE);
+		}
+	}
 	
-		g.strokeStyle = '#000000';
-		g.lineWidth = 3;
+	function Missile(x, y){
+		var SIZE = 16;
+		var THRUST = 0.05;
+		
+		var SOURCE = document.getElementById("input");
 	
-		g.beginPath();
-		g.moveTo(conX(0), conY(maxy));
-		g.lineTo(conX(0), conY(miny));
-		g.stroke();
+		this.pos = new Point(x, y);
+		this.vel = new Point(0, 0);
+		this.acc = new Point(0, 0);
 		
-		g.moveTo(0, conY(0));
-		g.lineTo(conX(maxt), conY(0));
-		g.stroke();
+		this.accref = SOURCE.value;
 		
-		g.lineWidth = 2;
-		
-		for(var i = 1; i < maxt; i ++){
-			g.moveTo(conX(i), conY(0) - 10);
-			g.lineTo(conX(i), conY(0) + 10);
-			g.stroke();
+		this.tick = function(){
+			this.accref = SOURCE.value;
 			
-			if(conY(0) + 14 < canvas.offsetHeight){
-				g.fillText(i, conX(i) + 4, conY(0) + 12);
-			}else{
-				g.fillText(i, conX(i) + 4, conY(0) - 6);
+			try{
+				this.acc = eval(this.accref);
 			}
+			catch(err){
+				this.acc = this.vel.mul(-1);
+				console.log("Bad input.");
+			}
+			
+			this.acc = this.acc.scale(THRUST);
+			
+			this.vel = this.vel.add(this.acc);
+			this.pos = this.pos.add(this.vel);
+			
 		}
 		
-		for(var i = maxy - 1; i > miny; i --){
-			if(i === 0){continue;}
-			
-			g.moveTo(conX(0) - 10, conY(i));
-			g.lineTo(conX(0) + 10, conY(i));
-			g.stroke();
-			
-			g.fillText(i, conX(0) + 12, conY(i) + 4);
+		this.render = function(){
+			g.fillStyle = "#E00000";
+			g.fillRect(this.pos.x - (SIZE / 2), this.pos.y - (SIZE / 2), SIZE, SIZE);
+		}
+	}
+	
+	////
+	
+	var WIDTH = 800;
+	var HEIGHT = 600;
+	
+	var c = document.getElementById("canvas");
+
+	canvas.width = WIDTH;
+	canvas.height = HEIGHT;
+		
+	var g = canvas.getContext("2d");
+	
+	////
+	
+	var TPS = 100;
+	
+	var target = new Dot((Math.random() * (WIDTH - 200)) + 100, (Math.random() * (HEIGHT - 200)) + 100);
+	var missile = new Missile(WIDTH / 2, HEIGHT / 2);
+	
+	////
+	
+	run = function(){
+		target.tick();
+		missile.tick();
+		
+		if(missile.pos.sub(target.pos).mag() < 10){
+			target.pos = new Point((Math.random() * (WIDTH - 200)) + 100, (Math.random() * (HEIGHT - 200)) + 100);
 		}
 		
-		g.lineWidth = 3;
+		////
+		
+		g.fillStyle = "#F4F4F8";
+		g.fillRect(0, 0, WIDTH, HEIGHT);
+	
+		target.render();
+		missile.render();
 	}
 	
-	function conX(x){
-		return 10 + ((x / maxt) * (canvas.offsetWidth - 10));
+	////
+	
+	resetMissile = function(){
+		missile = new Missile(WIDTH / 2, HEIGHT / 2);
 	}
 	
-	function conY(y){
-		return canvas.offsetHeight * (1 - ((y - miny) / (maxy - miny)));
-	}
+	////
+	
+	var gameloop = setInterval(run, 1000 / TPS);
 </script>
 
 </html>
