@@ -172,7 +172,7 @@
 			
 				var temp = this.speed * (((traj.mag() * this.accel) / 150) + 1);
 			
-				this.acc = (traj.scale(temp)).sub(this.vel);
+				this.acc = ((target.sub(this.pos)).scale(10)).sub(this.vel);
 			
 				if(this.acc.mag() > this.accel){this.acc = this.acc.scale(this.accel)};
 			}else{
