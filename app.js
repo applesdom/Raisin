@@ -8,9 +8,7 @@ var path = require('path');
 app.set('views', __dirname + '/');
 app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'html');
-app.use(express.static(path.join(__dirname,'/')));
-
-//app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // GET method route
 app.get('/', function (req, res) {
