@@ -29,6 +29,14 @@ app.get('/calc', function (req, res) {
   res.render('calc.html');
 });
 
+app.get('/missile', function (req, res) {
+  res.render('missile.html');
+});
+
+app.get('/gravity', function (req, res) {
+  res.render('gravity.html');
+});
+
 var port = process.env.PORT || 3000;
 
 http.createServer(app).listen(port, function(){
