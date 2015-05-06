@@ -4,64 +4,112 @@
 	<title>Physics</title>
 	
 	<style>
-		body {    
-			margin: 10;
+		body{
+			margin: 0;
+			padding: 20px;
+			overflow-x: hidden;
+		}
+		
+		div{
+			border: 0;
+			margin: 0;
 			padding: 0;
 		}
+		
 		table, th, td {
 		   border: 1px solid black;
+		   border-collapse: collapse;
 		}
-		table {
-			border-collapse: collapse;
+		
+		th{
+			padding-top: 5px;
+			padding-bottom: 5px;
+			padding-left: 10px;
+			padding-right: 10px;
 		}
+		
+		input, textarea{
+			margin: 5px;
+		}
+		
+		.smallInput{
+			width: 35px;
+		}
+		
+		input::-webkit-outer-spin-button, input::-webkit-inner-spin-button{
+			-webkit-appearance: none;
+			margin: 0;
+		}
+
 	</style>
 
 </head>
 
-<body style="width:100%;height:100%;overflow-x:hidden;">
-	<form>
-		Max pos:<br>
-		<input type="number" id="maxyin" value="10" style="margin:5px"><br>
-		Min pos:<br>
-		<input type="number" id="minyin" value="-10" style="margin:5px"><br>
-		Max t:<br>
-		<input type="number" id="maxtin" value="10" min="0" step=".1" style="margin:5px"><br>
-	</form>
+<body>
+	<div id="vars">
 	
-	<br><br><br>
+		<div id="sizevars">
+
+			Max pos:<br>
+			<input type="number" id="maxyin" class="smallInput" value="10"></input>
+			<br>
+			
+			Min pos:<br>
+			<input type="number" id="minyin" class="smallInput" value="-10"></input>
+			<br>
+			
+			Max t:<br>
+			<input type="number" id="maxtin" class="smallInput" value="10" min="0" step=".1"></input>
+			
+		</div>
 	
-	<form>
-		<input type="radio" name="method" value="accelDefined" onclick="setBase('acceleration')" checked>Acceleration based
-		<input type="radio" name="method" value="velDefined" onclick="setBase('velocity')">Velocity based
-	</form>
-	
-	<form>
-		Start position:<br>
-		<input type="number" id="sposin" value="0" style="margin:5px"><br>
-	</form>
-	
-	<form id="accbase">
-		Start velocity:<br>
-		<input type="number" id="svelin" value="0" style="margin:5px"><br>
-		Acceleration (use 'pos' for x position):<br>
-		<textarea id="accin" style="margin:5px">-pos</textarea><br>
-	</form>
-	
-	<form id="velbase" style="display:none;">
-		Velocity (use 'pos' for x position):<br>
-		<textarea id="velin" style="margin:5px">-pos</textarea><br>
-	</form>
-	
-	<form>
-		Interval (dt):<br>
-		<input type="number" id="interin" value="0.1" min="0" step=".1" style="margin:5px"><br>
+
 		
-		<input type="button" onclick="run()" value="Run" style="margin:15px">
-	</form>
+		<div id="simvars">
+			
+			<input type="radio" name="method" value="accelDefined" onclick="setBase('acceleration')" checked>Acceleration based</input>
+			<input type="radio" name="method" value="velDefined" onclick="setBase('velocity')">Velocity based</input>
+			<br>
+			
+			<br>
+
+			Start position:<br>
+			<input type="number" id="sposin" value="0"></input>
+			<br>
+			
+			<div class="accbase">
+			
+				Start velocity:<br>
+				<input type="number" id="svelin" value="0"></input>
+				<br>
+				
+				Acceleration (use 'pos' for x position):<br>
+				<textarea id="accin">-pos</textarea></input>
+				<br>
+				
+			</div>
+			
+			<div class="velbase" style="display: none;">
+			
+				Velocity (use 'pos' for x position):<br>
+				<textarea id="velin" class="velbase">-pos</textarea>
+				<br>
+				
+			</div>
+			
+			Interval (dt):<br>
+			<input type="number" id="interin" value="0.1" min="0" step=".1"></input>
+			<br>
+			
+			<input type="button" onclick="run()" value="Run" style="margin:15px"></input>
+			
+			</div>
+			
+	</div>
 	
-	<canvas id="canvas" width=800 height=400></canvas>
+	<canvas id="canvas" width=500 height=400></canvas>
 	
-	<div style="margin:10px">
+	<div id="table">
 		<table>
 			<thead>
 				<th>t</th>
@@ -73,6 +121,9 @@
 			</tbody>
 		</table>
 	</div>
+	
+	<div style="clear:both;"></div>
+	
 </body>
 
 <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
@@ -83,13 +134,13 @@
 	function setBase(newbase){
 	
 		if(newbase === "acceleration"){
-			document.getElementById('accbase').style.display = "block";
-			document.getElementById('velbase').style.display = "none";
+			document.getElementsByClassName('accbase')[0].style.display = "block";
+			document.getElementsByClassName('velbase')[0].style.display = "none";
 			
 			base = "acceleration";
 		}else if(newbase === "velocity"){
-			document.getElementById('accbase').style.display = "none";
-			document.getElementById('velbase').style.display = "block";
+			document.getElementsByClassName('accbase')[0].style.display = "none";
+			document.getElementsByClassName('velbase')[0].style.display = "block";
 			
 			base = "velocity";
 		}else{
@@ -197,12 +248,14 @@
 	function run(){
 		
 		clearInterval(thread);
+		
 		$('#output').empty();
-		drawGraph();
 	
 		maxy = maxyin.value;
 		miny = minyin.value;
 		maxt = maxtin.value;
+		
+		drawGraph();
 	
 		spos = sposin.value;
 		svel = svelin.value;
@@ -272,17 +325,16 @@
 			pos += vel * inter;
 		
 			curt += eval(inter);
-			
-			console.log(curt);
 		
 			g.lineTo(conX(curt), conY(pos));
 			g.stroke();
 			
 			if(curt > maxt){
 				clearInterval(thread);
-				console.log("Self terminating");
 			}
 		}
 	}
 	
 </script>
+
+</html>

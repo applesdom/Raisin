@@ -12,15 +12,162 @@
 			padding:0;
 			overflow:hidden;
 		}
+		
+		#sidebar{
+			margin:0;
+			border:0;
+			padding:0;
+			
+			position: fixed;
+			
+			width: 20%;
+			height: 100%;
+			min-width: 250px;
+			
+			right: 0px;
+			top: 0px;
+			
+			text-align: center;
+			
+			background-color: #80E0FF;
+		}
+		
+		#go{
+			margin: 15px;
+			
+			margin-right: auto;
+			margin-left: auto;
+			
+			display: block;
+			
+			width: 90%;
+			height: 75px;
+		}
+		
+		#addBody{
+		
+			margin: 30px;
+			
+			margin-right: auto;
+			margin-left: auto;
+			
+			display: block;
+			
+			height: 40px;
+		}
+		
+		#traits{
+			margin-right: 20px;
+			margin-left: 20px;
+			border: 0;
+			padding: 10px;
+		
+			background-color: #B0B0B0;
+			border-radius: 10px;
+		}
+		
+		.traitholder{
+			width: 40%;
+			
+			margin-top: 0px;
+			
+			display: inline-block;
+		}
+		
+		.smallInput{
+			padding: 0;
+			
+			width: 80px;
+		}
+		
+		#setTraits{
+			margin: 10px;
+			
+			margin-right: auto;
+			margin-left: auto;
+			
+			display: block;
+			
+			height: 20px;
+		}
+		
+		
+		
+		
+		input::-webkit-outer-spin-button, input::-webkit-inner-spin-button{
+			-webkit-appearance: none;
+			margin: 0;
+		}
 	</style>
 
 </head>
 
 <body>
+
 	<canvas id="canvas"></canvas>
+	
+	<div id="sidebar">
+	
+		<input type="button" id="go" value="Start Simulation" onclick="go()" style="color: #FF0000; font-weight: bold; font-size: 100%;"></input>
+		
+		<input type="button" id="addBody" value="Add Body" onclick="addBody()"></input>
+		
+		Viewscale:
+		<input type="number" id="scale" class="smallInput" value="1"></input>
+		<br><br><br>
+		
+		Timescale:
+		<input type="number" id="speed" class="smallInput" value="1"></input>
+		<br><br>
+		
+		Ticks per second:
+		<input type="number" id="ticks" class="smallInput" value="100"></input>
+		<br><br><br>
+		
+		<div id="traits">
+			
+			<div class="traitholder">
+				Color:<br>
+				<input type="text" id="color" class="smallInput"></input>
+				<br>
+				
+				Size:<br>
+				<input type="number" id="size" class="smallInput"></input>
+				<br>
+				
+				Mass:<br>
+				<input type="number" id="mass" class="smallInput"></input>
+				<br>
+			</div>
+			
+			<div class="traitholder">
+				Position-x:<br>
+				<input type="number" id="posx" class="smallInput"></input>
+				<br>
+				
+				Position-y:<br>
+				<input type="number" id="posy" class="smallInput"></input>
+				<br>
+				
+				Velocity-x:<br>
+				<input type="number" id="velx" class="smallInput"></input>
+				<br>
+				
+				Velocity-y:<br>
+				<input type="number" id="vely" class="smallInput"></input>
+				<br>
+			</div>
+			
+		</div>
+	
+		<input type="button" id="setTraits" value="Set Traits" onclick="setTraits()"></input>
+	</div>
+	
 </body>
 
 <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5/dat.gui.min.js"></script>
 
 <script>
 	function Point(x, y){
@@ -81,11 +228,15 @@
 
 	var canvas = document.getElementById("canvas");
 	
-	canvas.width = WIDTH = $(window).width();
+	canvas.width = WIDTH = $(window).width() * 0.8;
 	canvas.height = HEIGHT = $(window).height();
 	
-	$(window).resize(function() {
-	  	canvas.width = WIDTH = $(window).width();
+	$(window).resize(function(){
+		var noncanvas = $(window).width() * 0.2;
+		
+		if(noncanvas < 250){noncanvas = 250;}
+	
+	  	canvas.width = WIDTH = $(window).width() - noncanvas;
 		canvas.height = HEIGHT = $(window).height();
 	});
 	
@@ -93,42 +244,70 @@
 	
 	}////
 	
-	var TICKS_PER_SECOND = 1;
+	var TICKS_PER_SECOND = 100;
 	var TICK_LENGTH = 1 / TICKS_PER_SECOND;
 	
 	var SCALE = 1;
-	var SPEED = 100;
+	var SPEED = 1;
+	
+	////
+	
+	go = function(){
+		if(!running){
+			running = true;
+			
+			document.getElementById("go").value = "Pause";
+			document.getElementById("go").style.color = "#20FF20";
+		}else if(running){
+			running = false;
+			
+			document.getElementById("go").value = "Resume";
+			document.getElementById("go").style.color = "#FF2020";
+		}
+	}
 	
 	////
 	
 	var ents = [];
 	
+	var running = false;
+	
 	run = function(){
 	
-		for(var i = 0; i < ents.length; i ++){
-			ents[i].acc = new Point(0, 0);
-		}
-		
-		for(var i = 0; i < ents.length; i ++){
-			var cur = ents[i];
-		
-			for(var j = 0; j < ents.length; j ++){
-				if(i === j){continue;}
-			
-				var nex = ents[j];
-				
-				if(cur.pos.equals(nex.pos)){continue;}
-			
-				var temp = nex.pos.sub(cur.pos);
-				
-				var f = (6.67384e-11 * nex.mass) / Math.pow(temp.mag(), 2);
-			
-				cur.acc = cur.acc.add(temp.scale(f));
+		SCALE = Number(document.getElementById("scale").value)
+		SPEED = Number(document.getElementById("speed").value)
+		TICKS_PER_SECOND = Number(document.getElementById("ticks").value)
+		TICK_LENGTH = 1 / TICKS_PER_SECOND;
+	
+		if(running){
+	
+			for(var i = 0; i < ents.length; i ++){
+				ents[i].acc = new Point(0, 0);
 			}
-		}
-		
-		for(var i = 0; i < ents.length; i ++){
-			ents[i].update();
+			
+			for(var i = 0; i < ents.length; i ++){
+				var cur = ents[i];
+			
+				for(var j = 0; j < ents.length; j ++){
+					if(i === j){continue;}
+				
+					var nex = ents[j];
+					
+					if(cur.pos.equals(nex.pos)){continue;}
+				
+					var temp = nex.pos.sub(cur.pos);
+					
+					var f = (6.67384e-11 * nex.mass) / Math.pow(temp.mag(), 2);
+				
+					cur.acc = cur.acc.add(temp.scale(f));
+				}
+			}
+			
+			for(var i = 0; i < ents.length; i ++){
+				ents[i].update();
+			}
+			
+			updateStats();
 		}
 		
 		////
@@ -137,11 +316,95 @@
 		g.fillRect(0, 0, WIDTH, HEIGHT);
 		
 		for(var i = 0; i < ents.length; i ++){
-			ents[i].render();
+			var cur = ents[i];
+			cur.render();
+			
+			if(selectedBody === i){
+				g.strokeStyle = "#40B0F0";
+				g.lineWidth = 5;
+				g.beginPath();
+				g.arc((WIDTH / 2) + (cur.pos.x / SCALE), (HEIGHT / 2) - (cur.pos.y / SCALE), (cur.size / 2) / SCALE, 0, Math.PI * 2, true);
+				g.stroke();
+			}
 		}
 	}
 	
 	////
+	
+	var selectedBody = -1;
+	
+	canvas.addEventListener("click", onClick);
+	
+	function onClick(e){
+		
+		var index = -1;
+		
+		for(var i = 0; i < ents.length; i ++){
+			var cur = ents[i];
+			
+			var temp = new Point(conx(cur.pos.x), cony(cur.pos.y));
+			
+			if(temp.sub(new Point(e.clientX, e.clientY)).mag() < cur.size / (2 * SCALE) || temp.sub(new Point(e.clientX, e.clientY)).mag() < 5){
+				index = i;
+			}
+		}
+		
+		selectedBody = index;
+		
+		updateStats();
+	}
+	
+	function updateStats(){
+		if(selectedBody !== -1){
+			var body = ents[selectedBody];
+		
+			document.getElementById("color").value = body.color;
+			
+			if(body.size < 10000){
+				document.getElementById("size").value = body.size;
+			}else{
+				document.getElementById("size").value = body.size.toExponential();
+			}
+			
+			if(body.mass < 10000){
+				document.getElementById("mass").value = body.mass;
+			}else{
+				document.getElementById("mass").value = (body.mass).toExponential();
+			}
+			
+			document.getElementById("posx").value = body.pos.x.toFixed(3);
+			document.getElementById("posy").value = body.pos.y.toFixed(3);
+			document.getElementById("velx").value = body.vel.x.toFixed(3);
+			document.getElementById("vely").value = body.vel.y.toFixed(3);
+			
+		}else{
+			document.getElementById("color").value = null;
+			document.getElementById("size").value = null;
+			document.getElementById("mass").value = null;
+			document.getElementById("posx").value = null;
+			document.getElementById("posy").value = null;
+			document.getElementById("velx").value = null;
+			document.getElementById("vely").value = null;
+		}
+	}
+	
+	function setTraits(){
+		var body = ents[selectedBody];
+		
+		body.color = document.getElementById("color").value;
+		body.size = Number(document.getElementById("size").value);
+		body.mass = Number(document.getElementById("mass").value);
+		body.pos = new Point(Number(document.getElementById("posx").value), Number(document.getElementById("posy").value));
+		body.vel = new Point(Number(document.getElementById("velx").value), Number(document.getElementById("vely").value));
+	}
+	
+	function addBody(){
+		ents[ents.length] = new Body("#404040", 50, 1, 0, 0, 0, 0);
+	}
+	
+	////
+	
+	ents[0] = new Body("#404040", 50, 1, 0, 0, 0, 0);
 	
 	//ents[0] = new Body("#404040", 40, 1e17, -173.205080757, -100, -45, 77.9422863406);
 	//ents[1] = new Body("#404040", 40, 1e17, 0, 200, 90, 0);
@@ -157,13 +420,13 @@
 	//ents[0] = new Body("#10E0C0", 12742000, 5.972e24, 0, 0, 0, 0);
 	//ents[1] = new Body("#202020", 3474800, 7.34767309e22, 384000000, 0, 0, 1023);
 	
-	ents[0] = new Body("#10E0C0", 300, 1, 0, 0, 0, 0);
-	ents[1] = new Body("#505050", 150, 1, 150, 100, 0, 0);
-	ents[2] = new Body("#E01010", 50, 1, 200, -100, 0, 0);
+	//ents[0] = new Body("#10E0C0", 300, 1, 0, 0, 0, 0);
+	//ents[1] = new Body("#505050", 150, 1, 150, 100, 0, 0);
+	//ents[2] = new Body("#E01010", 50, 1, 200, -100, 0, 0);
 	
 	////
 	
-	setInterval(run, 1000 / (TICKS_PER_SECOND * SPEED));
+	var mainthread = setInterval(run, 1000 / (TICKS_PER_SECOND * SPEED));
 	
 	////
 	
@@ -172,8 +435,16 @@
 	
 		g.fillStyle = color;
 		g.beginPath();
-		g.arc((WIDTH / 2) + (x / SCALE), (HEIGHT / 2) - (y / SCALE), (size / 2) / SCALE, 0, Math.PI * 2, true);
+		g.arc(conx(x), cony(y), (size / 2) / SCALE, 0, Math.PI * 2, true);
 		g.fill();
+	}
+	
+	conx = function(x){
+		return (WIDTH / 2) + (x / SCALE);
+	}
+	
+	cony = function(y){
+		return (HEIGHT / 2) - (y / SCALE);
 	}
 </script>
 
