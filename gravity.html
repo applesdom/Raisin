@@ -91,32 +91,7 @@
 			height: 20px;
 		}
 		
-		#saves{
-			margin-top: 10px;
-			margin-bottom: 20px;
-			margin-left: 20px;
-			margin-right: 20px;
-			border: 0;
-			padding-top: 10px;
-			padding-bottom: 10px;
-			padding-left: 5px;
-			padding-right: 5px;
-			
-			text-align: center;
-			
-			border-radius: 10px;
-			background-color: #B0B0B0;
-		}
 		
-		.saveButton{
-			min-width: 50px;
-		
-			margin: 10px;
-		}
-		
-		#namefield{
-			width: 80px;
-		}
 		
 		
 		input::-webkit-outer-spin-button, input::-webkit-inner-spin-button{
@@ -186,23 +161,6 @@
 		</div>
 	
 		<input type="button" id="setTraits" value="Set Traits" onclick="setTraits()"></input>
-		
-		<br>
-		<input type="text" id="namefield"></input>
-		<input type="button" id="save" value="Save" onclick="save()"></input>
-		
-		<div id="saves">
-			
-			<input type="button" class="saveButton" value="Trifecta" onclick="load([
-				new Body('#404040', 40, 1e17, 0, 200, 90, 0),
-				new Body('#404040', 40, 1e17, -173.205080757, -100, -45, 77.9422863406),
-				new Body('#404040', 40, 1e17, 173.205080757, -100, -45, -77.9422863406)])"></input>
-				
-			<input type="button" class="saveButton" value="Earth 1" onclick="load([
-				new Body('#10E0C0', 12742000, 5.972e24, 0, 0, 0, 0),
-				new Body('#202020', 100000, 10000, 6571000, 0, 0, 7788)])"></input>
-
-		</div>
 	</div>
 	
 </body>
@@ -286,11 +244,11 @@
 	
 	}////
 	
+	var TICKS_PER_SECOND = 100;
+	var TICK_LENGTH = 1 / TICKS_PER_SECOND;
+	
 	var SCALE = 1;
 	var SPEED = 1;
-	
-	var TICKS_PER_SECOND = 100;
-	var TICK_LENGTH = SPEED / TICKS_PER_SECOND;
 	
 	////
 	
@@ -319,7 +277,7 @@
 		SCALE = Number(document.getElementById("scale").value)
 		SPEED = Number(document.getElementById("speed").value)
 		TICKS_PER_SECOND = Number(document.getElementById("ticks").value)
-		TICK_LENGTH = SPEED / TICKS_PER_SECOND;
+		TICK_LENGTH = 1 / TICKS_PER_SECOND;
 	
 		if(running){
 	
@@ -444,32 +402,16 @@
 		ents[ents.length] = new Body("#404040", 50, 1, 0, 0, 0, 0);
 	}
 	
-	function save(){
-		var html = '<input type="button" class="saveButton" value=' + document.getElementById("namefield").value + ' onclick="load(['
-		
-		for(var i = 0; i < ents.length; i ++){
-			html = html + "new Body('" + ents[i].color + "', " + ents[i].size + ", " + ents[i].mass + ", " + ents[i].pos.x + ", " + 
-			ents[i].pos.y + ", " + ents[i].vel.x + ", " + ents[i].vel.y + ")";
-			
-			if(i !== ents.length - 1){
-				html = html + ", "
-			}
-		}
-			
-		html = html + '])"></input>';
-	
-		$('#saves').append(html);
-	}
-	
-	function load(s){
-		ents = s;
-		selectedBody = -1;
-		updateStats();
-	}
-	
 	////
 	
 	ents[0] = new Body("#404040", 50, 1, 0, 0, 0, 0);
+	
+	//ents[0] = new Body("#404040", 40, 1e17, -173.205080757, -100, -45, 77.9422863406);
+	//ents[1] = new Body("#404040", 40, 1e17, 0, 200, 90, 0);
+	//ents[2] = new Body("#404040", 40, 1e17, 173.205080757, -100, -45, -77.9422863406);
+	
+	//ents[0] = new Body("#10E0C0", 12742000, 5.972e24, 0, 0, 0, 0);
+	//ents[1] = new Body("#202020", 100000, 10000, 6571000, 0, 0, 7700);
 	
 	//ents[0] = new Body("#F0F010", 1391684000, 1.989e30, 0, 0, 0, 0);
 	//ents[1] = new Body("#10E0C0", 12742000, 5.972e24, 149600000000, 0, 0, 29780);
@@ -484,7 +426,7 @@
 	
 	////
 	
-	var mainthread = setInterval(run, 1000 / (TICKS_PER_SECOND));
+	var mainthread = setInterval(run, 1000 / (TICKS_PER_SECOND * SPEED));
 	
 	////
 	
