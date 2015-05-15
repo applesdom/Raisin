@@ -193,14 +193,17 @@
 		
 		<div id="saves">
 			
-			<input type="button" class="saveButton" value="Trifecta" onclick="load([
-				new Body('#404040', 40, 1e17, 0, 200, 90, 0),
-				new Body('#404040', 40, 1e17, -173.205080757, -100, -45, 77.9422863406),
-				new Body('#404040', 40, 1e17, 173.205080757, -100, -45, -77.9422863406)])"></input>
+			<input type="button" class="saveButton" value="Orbit" onclick="load(0)"></input>
 				
-			<input type="button" class="saveButton" value="Earth 1" onclick="load([
-				new Body('#10E0C0', 12742000, 5.972e24, 0, 0, 0, 0),
-				new Body('#202020', 100000, 10000, 6571000, 0, 0, 7788)])"></input>
+			<input type="button" class="saveButton" value="Earth 1" onclick="load(1)"></input>
+			
+			<input type="button" class="saveButton" value="Earth 2" onclick="load(2)"></input>
+			
+			<input type="button" class="saveButton" value="Earth 3" onclick="load(3)"></input>
+			
+			<input type="button" class="saveButton" value="Trifecta" onclick="load(4)"></input>
+			
+			<input type="button" class="saveButton" value="Jupiter" onclick="load(5)"></input>
 
 		</div>
 	</div>
@@ -266,6 +269,12 @@
 		}
 	}
 
+	function Save(){
+		this.entities = [];
+		this.name = "new save";
+		this.selected = -1;
+	}
+	
 	{////
 
 	var canvas = document.getElementById("canvas");
@@ -441,35 +450,111 @@
 	}
 	
 	function addBody(){
-		ents[ents.length] = new Body("#404040", 50, 1, 0, 0, 0, 0);
-	}
-	
-	function save(){
-		var html = '<input type="button" class="saveButton" value=' + document.getElementById("namefield").value + ' onclick="load(['
+		ents[ents.length] = new Body("#404040", WIDTH / 20, 1, 0, 0, 0, 0);
 		
-		for(var i = 0; i < ents.length; i ++){
-			html = html + "new Body('" + ents[i].color + "', " + ents[i].size + ", " + ents[i].mass + ", " + ents[i].pos.x + ", " + 
-			ents[i].pos.y + ", " + ents[i].vel.x + ", " + ents[i].vel.y + ")";
-			
-			if(i !== ents.length - 1){
-				html = html + ", "
-			}
-		}
-			
-		html = html + '])"></input>';
-	
-		$('#saves').append(html);
-	}
-	
-	function load(s){
-		ents = s;
-		selectedBody = -1;
+		selectedBody = ents.length - 1;
 		updateStats();
 	}
 	
 	////
 	
+	var saves = [];
+	
+	function save(){
+		
+		var savename = document.getElementById("namefield").value;
+		
+		for(var i = 0; i < saves.length; i ++){
+			if(saves[i].name === savename){
+				saves[i].entities = clone(ents);
+				saves[i].selected = selectedBody;
+				return;
+			}
+		}
+		
+		var html = '<input type="button" class="saveButton" value=' + savename + ' onclick="load([' + saves.length + '])"></input>';
+		$('#saves').append(html);
+		
+		var temp = saves.length;
+		
+		saves[temp] = new Save();
+		saves[temp].entities = clone(ents);
+		saves[temp].name = savename;
+		saves[temp].selected = selectedBody;
+	}
+	
+	function load(index){
+		ents = clone(saves[index].entities);
+		
+		ents.length = saves[index].entities.length;
+		
+		selectedBody = saves[index].selected;
+		updateStats();
+		
+		savename = document.getElementById("namefield").value = saves[index].name;
+	}
+	
+	function clone(set){
+		var ret = [];
+	
+		for(var i = 0; i < set.length; i ++){
+			var body = set[i];
+		
+			ret[i] = new Body("#404040", WIDTH / 20, 1, 0, 0, 0, 0);
+			ret[i].color = body.color;
+			ret[i].size = body.size;
+			ret[i].mass = body.mass;
+			ret[i].pos.x = body.pos.x;
+			ret[i].pos.y = body.pos.y;
+			ret[i].vel.x = body.vel.x;
+			ret[i].vel.y = body.vel.y;
+		}
+		
+		return ret;
+	}
+	
+	////
+	
 	ents[0] = new Body("#404040", 50, 1, 0, 0, 0, 0);
+	
+	saves[0] = new Save();
+	saves[0].entities = [new Body('#404040', 50, 1e18, 0, 0, 0, 0),
+						new Body('#404040', 20, 1000, 400, 0, 0, 300)];
+	saves[0].name = "Orbit";
+	saves[0].selected = -1;
+	
+	saves[1] = new Save();
+	saves[1].entities = [new Body('#10E0C0', 12742000, 5.972e24, 0, 0, 0, 0),
+						new Body('#202020', 100000, 10000, 6571000, 0, 0, 7788)];
+	saves[1].name = "Earth 1";
+	saves[1].selected = -1;
+	
+	saves[2] = new Save();
+	saves[2].entities = [new Body('#10E0C0', 12742000, 5.972e24, 0, 0, 0, 0),
+						new Body('#A0A0B6', 3474800, 7.34767309e22, 384400000, 0, 0, 1023)];
+	saves[2].name = "Earth 2";
+	saves[2].selected = -1;
+	
+	saves[3] = new Save();
+	saves[3].entities = [new Body('#10E0C0', 12742000, 5.972e24, 0, -6371000, 0, 0),
+						new Body('#202020', 10, 10, 0, 50, 0, 0)];
+	saves[3].name = "Earth 3";
+	saves[3].selected = -1;
+	
+	saves[4] = new Save();
+	saves[4].entities = [new Body('#404040', 40, 1e17, 0, 200, 90, 0),
+						new Body('#404040', 40, 1e17, -173.205080757, -100, -45, 77.9422863406),
+						new Body('#404040', 40, 1e17, 173.205080757, -100, -45, -77.9422863406)];
+	saves[4].name = "Trifecta";
+	saves[4].selected = -1;
+	
+	saves[5] = new Save();
+	saves[5].entities = [new Body('#D09040', 139822000, 1.898e27, 0, 0, 0, 0),
+						new Body('#E0C060', 3160000, 4.799844e22, 670900000, 0, 0, 13740),
+						new Body('#D0D080', 3636000, 8.931938e22, 421700000, 0, 0, 17334),
+						new Body('#787060', 5268000, 1.4819e23, 1070400000, 0, 0, 10880)];
+	saves[5].name = "Jupiter";
+	saves[5].selected = -1;
 	
 	//ents[0] = new Body("#F0F010", 1391684000, 1.989e30, 0, 0, 0, 0);
 	//ents[1] = new Body("#10E0C0", 12742000, 5.972e24, 149600000000, 0, 0, 29780);
@@ -483,6 +568,8 @@
 	//ents[2] = new Body("#E01010", 50, 1, 200, -100, 0, 0);
 	
 	////
+	
+	addBody();
 	
 	var mainthread = setInterval(run, 1000 / (TICKS_PER_SECOND));
 	
