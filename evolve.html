@@ -1,0 +1,446 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Dot Stuff</title>
+	
+	<style>
+		body
+		{    
+			margin: 0;
+			border: 0;
+			padding: 0;
+			
+			width: 100%;
+			height: 100%;
+			
+			overflow: hidden;
+		}
+	</style>
+</head>
+
+<body>
+	<canvas id="draw"></canvas>
+</body>
+
+<script>
+
+	////Classes
+	{
+	
+	function Point(x, y)
+	{
+		this.y = y;
+		this.x = x;
+		
+		this.mag = function(){
+			return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+		}
+		
+		this.add = function(p){
+			return new Point(this.x + p.x, this.y + p.y);
+		}
+		
+		this.sub = function(p){
+			return new Point(this.x - p.x, this.y - p.y);
+		}
+		
+		this.mul = function(s){
+			return new Point(this.x * s, this.y * s);
+		}
+		
+		this.dis = function(p){
+			return this.sub(p).mag();
+		}
+		
+		this.scale = function(s)
+		{
+			if(this.x === 0 && this.y === 0)
+			{
+				return new Point(0, 0);
+			}
+		
+			return new Point((s / this.mag()) * this.x, (s / this.mag()) * this.y);
+		}
+		
+		this.toString = function(){
+			return this.x + ', ' + this.y;
+		}
+		
+		this.equals = function(p){
+			return (this.x == p.x) && (this.y == p.y);
+		}
+	}
+	
+	function Dot(speed, accel, lifespan, pos)
+	{
+		this.speed = speed;
+		this.accel = accel;
+		this.lifespan = lifespan;
+
+		this.pos = pos;
+		this.vel = new Point(0, 0);
+		this.acc = new Point(0, 0);
+		
+		this.life = 0;
+		
+		this.mutate = function()
+		{
+			var temp = new Dot(((dotMutateMax * 20) * Math.pow((Math.random() * 2) - 1, dotMutatePower)) + this.speed,
+							((dotMutateMax * 20) * Math.pow((Math.random() * 2) - 1, dotMutatePower)) + this.accel, 
+							((dotMutateMax * 2) * Math.pow((Math.random() * 2) - 1, dotMutatePower)) + this.lifespan, 
+							this.pos);
+			
+			return temp;
+		}
+		
+		this.tick = function()
+		{	
+			//Find target
+			
+			var target = undefined;
+			
+			var minDis = WIDTH * HEIGHT;
+			
+			for(var i = 0; i < food.length; i ++)
+			{
+				if(!food[i].alive)
+				{
+					continue;
+				}
+			
+				if(this.pos.dis(food[i].pos) + food[i].targeting < minDis)
+				{
+					minDis = this.pos.dis(food[i].pos);
+					
+					target = food[i];
+				}
+			}
+			
+			if(target != undefined)
+			{
+				target.targeting += dotCourtesy;
+			}
+		
+			//Calculate acceleration
+			
+			if(target != undefined)
+			{
+				this.acc = ((((target.pos).sub(this.pos)).scale(this.speed)).sub(this.vel)).mul(FPS);
+			}
+			else
+			{
+				this.acc = (this.vel.mul(-FPS));
+			}
+			
+			if(this.acc.mag() > this.accel){this.acc = this.acc.scale(this.accel)};
+			
+			//Update position
+			
+			this.vel = this.vel.add(this.acc.mul(1 / FPS));
+			
+			if(this.vel.mag() > dotMaxSpeed){this.vel = this.vel.scale(dotMaxSpeed);}
+			
+			this.pos = this.pos.add(this.vel.mul(1 / FPS));
+			
+			if(this.pos.x < -border){this.pos.x = -border};
+			if(this.pos.y < -border){this.pos.y = -border};
+			if(this.pos.x > WIDTH + border){this.pos.x = WIDTH + border};
+			if(this.pos.y > HEIGHT + border){this.pos.y = HEIGHT + border};
+			
+			//Check if target is eaten
+			
+			if(target != undefined && this.pos.dis(target.pos) < dotSize / 2)
+			{
+				target.kill();
+				
+				dots.push(this.mutate());
+			}
+			
+			//Age
+			
+			this.life += 1 / FPS;
+			
+			if(this.life > this.lifespan)
+			{
+				dots.splice(dots.indexOf(this), 1);
+				return;
+			}
+		}
+		
+		this.render = function()
+		{	
+			g.fillStyle = "#F06060";
+			
+			g.fillRect(this.pos.x - (dotSize / 2), this.pos.y - (dotSize / 2), dotSize, dotSize);
+			
+			if(dotText != 1 && dotText != 2)
+			{
+				g.fillText(this.speed.toFixed(2) + " " + this.accel.toFixed(2) + " " + this.lifespan.toFixed(2), 10 + (150 * Math.floor(textCount / HEIGHT)), (textCount % HEIGHT));
+				
+				textCount += 20;
+			}
+		}
+	}
+	
+	function Food(pos)
+	{
+		this.pos = pos;
+		
+		this.targeting = 0;
+		
+		this.alive = true;
+		
+		this.kill = function()
+		{
+			this.alive = false;
+			
+			var newX = this.pos.x + (((Math.random() * 2) - 1) * foodDrift);
+			var newY = this.pos.y + (((Math.random() * 2) - 1) * foodDrift);
+			
+			if(newX < 0)
+			{
+				newX = 0;
+			}
+			else if(newX > WIDTH)
+			{
+				newX = WIDTH;
+			}
+			
+			if(newY < 0)
+			{
+				newY = 0;
+			}
+			else if(newY > HEIGHT)
+			{
+				newY = HEIGHT;
+			}
+			
+			var that = this;
+			
+			setTimeout(function()
+			{
+				that.pos = new Point(newX, newY);
+				that.alive = true;
+			}, foodRate / speed);
+		}
+		
+		this.render = function()
+		{
+			if(this.alive)
+			{
+				g.fillStyle = "#60D060";
+				
+				g.fillRect(this.pos.x - (foodSize / 2), this.pos.y - (foodSize / 2), foodSize, foodSize);
+			}
+		}
+	}
+	
+	}////
+	
+	////Graphics initialization
+	{
+	
+	var WIDTH;
+	var HEIGHT;
+	
+	var canvas = document.getElementById('draw');
+	var g = canvas.getContext('2d');
+
+	canvas.width = WIDTH = window.innerWidth;
+	canvas.height = HEIGHT = window.innerHeight;
+
+	window.onresize = function(event)
+	{
+    	canvas.width = WIDTH = window.innerWidth;
+		canvas.height = HEIGHT = window.innerHeight;
+		
+		for(var i = 0; i < food.length; i ++)
+		{
+			if(food[i].pos.x < 0)
+			{
+				food[i].pos.x = 0;
+			}
+			else if(food[i].pos.x > WIDTH)
+			{
+				food[i].pos.x = WIDTH;
+			}
+			
+			if(food[i].pos.y < 0)
+			{
+				food[i].pos.y = 0;
+			}
+			else if(food[i].pos.y > HEIGHT)
+			{
+				food[i].pos.y = HEIGHT;
+			}
+		}
+	}
+		
+	var g = canvas.getContext('2d');
+	
+	}////
+	
+	////Global variables
+	{
+	
+	//influences calculations per second, but not overall speeds
+	var FPS = 64;
+	
+	//influences simulation speed, but not calculations per simulated second
+	var speed = 1;
+	
+	//dots may not travel faster than this.
+	var dotMaxSpeed = FPS * 50;
+	
+	//dots may not travel past this distance off of screen
+	var border = 100;
+	
+	//dots are rendered and pick up food at this size
+	var dotSize = 15;
+	
+	//dots will consider every targeter as this much distance 
+	var dotCourtesy = 50;
+	
+	//food provides this much value
+	var foodValue = 24;
+	
+	//food is rendered at this size
+	var foodSize = 8;
+	
+	//maximum quantity of food
+	var foodMax = 12;
+	
+	//food will take this many milliseconds to respawn
+	var foodRate = 8000;
+	
+	//food can respawn at up to this distance from its parent
+	var foodDrift = 30;
+	
+	//maximum mutation in a single generation. 1 is default.
+	var dotMutateMax = 1;
+	
+	//higher value means extreme mutations are less likely. MUST BE ODD!
+	var dotMutatePower = 3;
+	
+	//determines text drawn in corner. 0 = all text. 1 = average only. 2 = no text. defaults to 0.
+	var dotText = 1;
+	
+	var help = "Use addDot(speed, accel, lifespan) to add dots to the simulation.\n\nUse kill() to clear all dots from the environment.\n\nList of game variables:\n FPS\n speed\n dotMaxSpeed\n border\n dotSize\n dotCourtesy\n foodValue\n foodSize\n foodMax\n foodRate\n foodDrift\n dotMutateMax\n dotMutatePower\n dotText";
+	
+	var textCount = 10;
+	
+	var food = [];
+	var dots = [];
+	
+	}////
+	
+	////Key methods
+	{
+	
+	run = function()
+	{	
+		if(speed != 0)
+		{
+			tick();
+			render();
+		
+			setTimeout(run, (1000 / FPS) / speed);
+		}
+		else
+		{
+			render();
+			setTimeout(run, 100);
+		}
+	}
+	
+	tick = function()
+	{
+		for(var i = 0; i < food.length; i ++)
+		{
+			food[i].targeting = 0;
+		}
+	
+		for(var i = 0; i < dots.length; i ++)
+		{
+			dots[i].tick();
+		}
+		
+		if(food.length < foodMax)
+		{
+			food.push(new Food(new Point(Math.random() * WIDTH, Math.random() * HEIGHT)));
+		}
+		
+		if(food.length > foodMax)
+		{
+			food.splice(food.length - 2, 1);
+		}
+	}
+	
+	render = function()
+	{
+		g.fillStyle = "#F0F0F0";
+		g.fillRect(0, 0, WIDTH, HEIGHT);
+		
+		textCount = 20;
+		
+		if(dotText != 2)
+		{
+			var a = 0;
+			var b = 0;
+			var c = 0;
+			
+			for(var i = 0; i < dots.length; i ++)
+			{
+				a += dots[i].speed;
+				b += dots[i].accel;
+				c += dots[i].lifespan;
+			}
+			
+			a = a / dots.length;
+			b = b / dots.length;
+			c = c / dots.length;
+			
+			g.fillStyle = "#101010";
+			g.fillText(a.toFixed(2) + " " + b.toFixed(2) + " " + c.toFixed(2), 10 + (150 * Math.floor(textCount / HEIGHT)), (textCount % HEIGHT));
+			
+			textCount += 20;
+		}
+		
+		for(var i = 0; i < dots.length; i ++)
+		{
+			dots[i].render();
+		}
+		
+		for(var i = 0; i < food.length; i++)
+		{
+			food[i].render();
+		}
+	}
+	
+	addDot = function(speed, accel, lifespan)
+	{
+		var temp = new Dot(speed, accel, lifespan, new Point(Math.random() * WIDTH, Math.random() * HEIGHT));
+		
+		dots.push(temp);
+		
+		return "New dot created.";
+	}
+	
+	kill = function()
+	{
+		dots.clear();
+		
+		return "All dots have been killed.  You monster.";
+	}
+	
+	}////
+	
+	////
+	
+	run();
+	
+	addDot(100, 100, 10);
+	
+</script>
+
+</html>

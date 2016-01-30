@@ -1,140 +1,160 @@
 <!DOCTYPE HTML>
 <html>
+
 <head>
+
 	<title>Index</title>
 	
-	<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
-	
 	<style>
+	
 		body
 		{
-			border: 0;
-			margin: 0;
-			padding: 0;
-			font-family: 'Open Sans', sans-serif;
-			background-color: #00BCD4;
+			margin: 0px;
+		
+			background-color: #404040;
+		}
+	
+		#header
+		{
+			position: relative;
+			
+			top: 0px;
+			
+			left: 0px;
+			right: 0px;
+		
+			padding: 20px;
+			
+			//text-align: center;
+		
+			background-color: #E8E8E8;
 		}
 		
 		#title
 		{
-			border: 0;
-			margin: 0;
-			padding: 20px;
-		
-			text-align: center;
+			position: relative;
+			
+			left: 20px;
+			
+			font-size: 38px;
+			font-family: Georgia, serif;
 		}
 		
-		h1
+		#citation
 		{
-			border: 0;
-			margin: 0;
-			padding: 0;
+			float: right;
 			
-			color: #000000;
+			text-align: right;
+			
+			font-size: 12px;
+			font-family: Verdana, Geneva, sans-serif;
 		}
 		
 		#main
 		{
-			border: 0;
-			margin: 0;
-			padding: 20px;
+			position: relative;
+			
+			top: 20px;
+			
+			width: 80%;
 			
 			margin-left: auto;
 			margin-right: auto;
-			width: 70%;
-			
-			background-color: #E6E6E6;
-			
-			border-radius: 10px;
 		
-			text-align: center;
+			padding: 20px;
+		
+			border-radius: 15px;
+		
+			background-color: #E8E8E8;
 		}
 		
 		table
 		{
-			border: 0;
-			margin: 0;
-			padding: 0;
+			position: relative;
 		
 			width: 100%;
+			
+			cursor: pointer;
 		}
 		
-		td
+		.image
 		{
-			border: 0;
-			margin: 0;
+			width: 128px;
+			height: 128px;
+			
 			padding: 10px;
 		}
 		
-		.image{
-			width: 96px;
-			height: 96px;
+		.description
+		{
+			position: relative;
+		
+			padding: 20px;
+			
+			font-size: 16px;
+			font-family: Verdana, Geneva, sans-serif;
 		}
 		
-		#main > table tr:hover
+		.date
 		{
-			background:color:#999999;
-			cursor:pointer;
+			text-align: center;
+			
+			font-size: 16px;
+			font-family: Verdana, Geneva, sans-serif;
 		}
+	
 	</style>
 
 </head>
 
 <body>
 
-	<div id="title">
-		<h1>WELCOME TO THE WEBSITE!!!</h1>
+	<div id="header">
+	
+		<span id="title">Welcome to the Website</span>
+		
+		<span id="citation">Created by Dominic Voto.<br>applesdom@gmail.com</span>
+		
 	</div>
 	
 	<div id="main">
-		<h2>Check out these projects:</h5>
-		
+	
 		<table>
-			<tbody>
-				<tr onclick="document.location = '/dots';">
-					<td class="image">
-						<a href="/dots" style="display: block; text-decoration: none;">
-						<img src="dots.PNG" alt="dots" style="width:96px;height:96px">
-						</a>
-					</td>
-					<td class="description">
-						<p>Simulates evolution in simple environment.</p>
-					</td>
-					<td class="date">
-						<p>Update: April 19, 2015</p>
-					</td>
-				</tr>
-				
-				<tr onclick="document.location = '/calc';">
-					<td class="image">
-						<a href="/calc" style="display: block; text-decoration: none;">
-						<img src="calc.PNG" alt="calc" style="width:96px;height:96px">
-						</a>
-					</td>
-					<td class="description">
-						<p>Graphs physics problems involving position, velocity, and acceleration.</p>
-					</td>
-					<td class="date">
-						<p>Update: April 27, 2015</p>
-					</td>
-				</tr>
-				
-				<tr onclick="document.location = '/gravity';">
-					<td class="image">
-						<a href="/gravity" style="display: block; text-decoration: none;">
-						<img src="gravity.PNG" alt="calc" style="width:96px;height:96px">
-						</a>
-					</td>
-					<td class="description">
-						<p>WIP: Simulates gravitational motion in multi-body systems.</p>
-					</td>
-					<td class="date">
-						<p>Update: May 4, 2015</p>
-					</td>
-				</tr>
-			</tbody>
+			
+			<tr class="project" onclick="document.location = '/gravity'">
+			
+				<td><img class="image" src="gravity.png" alt="Gravity image"></td>
+		
+				<td class="description"><span>Simulates gravitational motion in multi-body systems.</span></td>
+		
+				<td class="date"><span>Update: May 4, 2015</span></td>
+			
+			</tr>
+			
+			<tr class="project" onclick="document.location = '/calc'">
+			
+				<td><img class="image" src="calc.png" alt="Calc image"></td>
+		
+				<td class="description"><span>Visualizes physics problems involving position, velocity, and acceleration.</span></td>
+		
+				<td class="date"><span>Update: April 27, 2015</span></td>
+			
+			</tr>
+			
+			<tr class="project" onclick="document.location = '/dots'">
+			
+				<td><img class="image" src="dots.png" alt="Dots image"></td>
+		
+				<td class="description"><span>Simulates inter-species competition and evolution over time in a simple environment.</span></td>
+		
+				<td class="date"><span>Update: April 19, 2015</span></td>
+			
+			</tr>
+			
 		</table>
+		
 	</div>
+
 </body>
 
 </html>

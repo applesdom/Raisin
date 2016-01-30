@@ -1,0 +1,140 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Index</title>
+	
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+	
+	<style>
+		body
+		{
+			border: 0;
+			margin: 0;
+			padding: 0;
+			font-family: 'Open Sans', sans-serif;
+			background-color: #00BCD4;
+		}
+		
+		#title
+		{
+			border: 0;
+			margin: 0;
+			padding: 20px;
+		
+			text-align: center;
+		}
+		
+		h1
+		{
+			border: 0;
+			margin: 0;
+			padding: 0;
+			
+			color: #000000;
+		}
+		
+		#main
+		{
+			border: 0;
+			margin: 0;
+			padding: 20px;
+			
+			margin-left: auto;
+			margin-right: auto;
+			width: 70%;
+			
+			background-color: #E6E6E6;
+			
+			border-radius: 10px;
+		
+			text-align: center;
+		}
+		
+		table
+		{
+			border: 0;
+			margin: 0;
+			padding: 0;
+		
+			width: 100%;
+		}
+		
+		td
+		{
+			border: 0;
+			margin: 0;
+			padding: 10px;
+		}
+		
+		.image{
+			width: 96px;
+			height: 96px;
+		}
+		
+		#main > table tr:hover
+		{
+			background:color:#999999;
+			cursor:pointer;
+		}
+	</style>
+
+</head>
+
+<body>
+
+	<div id="title">
+		<h1>WELCOME TO THE WEBSITE!!!</h1>
+	</div>
+	
+	<div id="main">
+		<h2>Check out these projects:</h5>
+		
+		<table>
+			<tbody>
+				<tr onclick="document.location = '/dots';">
+					<td class="image">
+						<a href="/dots" style="display: block; text-decoration: none;">
+						<img src="dots.PNG" alt="dots" style="width:96px;height:96px">
+						</a>
+					</td>
+					<td class="description">
+						<p>Simulates evolution in simple environment.</p>
+					</td>
+					<td class="date">
+						<p>Update: April 19, 2015</p>
+					</td>
+				</tr>
+				
+				<tr onclick="document.location = '/calc';">
+					<td class="image">
+						<a href="/calc" style="display: block; text-decoration: none;">
+						<img src="calc.PNG" alt="calc" style="width:96px;height:96px">
+						</a>
+					</td>
+					<td class="description">
+						<p>Graphs physics problems involving position, velocity, and acceleration.</p>
+					</td>
+					<td class="date">
+						<p>Update: April 27, 2015</p>
+					</td>
+				</tr>
+				
+				<tr onclick="document.location = '/gravity';">
+					<td class="image">
+						<a href="/gravity" style="display: block; text-decoration: none;">
+						<img src="gravity.PNG" alt="calc" style="width:96px;height:96px">
+						</a>
+					</td>
+					<td class="description">
+						<p>WIP: Simulates gravitational motion in multi-body systems.</p>
+					</td>
+					<td class="date">
+						<p>Update: May 4, 2015</p>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</body>
+
+</html>
