@@ -1,160 +1,54 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html>
-
+<!--Everybody dies twice.  The first is when your heart stops beating.  The second is when somebody says your name for the last time.-->
 <head>
-
-	<title>Index</title>
-	
-	<style>
-	
-		body
-		{
-			margin: 0px;
-		
-			background-color: #404040;
-		}
-	
-		#header
-		{
-			position: relative;
-			
-			top: 0px;
-			
-			left: 0px;
-			right: 0px;
-		
-			padding: 20px;
-			
-			//text-align: center;
-		
-			background-color: #E8E8E8;
-		}
-		
-		#title
-		{
-			position: relative;
-			
-			left: 20px;
-			
-			font-size: 38px;
-			font-family: Georgia, serif;
-		}
-		
-		#citation
-		{
-			float: right;
-			
-			text-align: right;
-			
-			font-size: 12px;
-			font-family: Verdana, Geneva, sans-serif;
-		}
-		
-		#main
-		{
-			position: relative;
-			
-			top: 20px;
-			
-			width: 80%;
-			
-			margin-left: auto;
-			margin-right: auto;
-		
-			padding: 20px;
-		
-			border-radius: 15px;
-		
-			background-color: #E8E8E8;
-		}
-		
-		table
-		{
-			position: relative;
-		
-			width: 100%;
-			
-			cursor: pointer;
-		}
-		
-		.image
-		{
-			width: 128px;
-			height: 128px;
-			
-			padding: 10px;
-		}
-		
-		.description
-		{
-			position: relative;
-		
-			padding: 20px;
-			
-			font-size: 16px;
-			font-family: Verdana, Geneva, sans-serif;
-		}
-		
-		.date
-		{
-			text-align: center;
-			
-			font-size: 16px;
-			font-family: Verdana, Geneva, sans-serif;
-		}
-	
-	</style>
-
+<style>
+html {
+	width: 100%;
+	height: 100%;
+	background-color: black;
+}
+body {
+	color: grey;
+	text-align: center;
+	font-size: 80px;
+	font-family: "Courier New", monospace;
+	margin: 0;
+	background-color: black;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+</style>
 </head>
-
 <body>
-
-	<div id="header">
-	
-		<span id="title">Welcome to the Website</span>
-		
-		<span id="citation">Created by Dominic Voto.<br>applesdom@gmail.com</span>
-		
-	</div>
-	
-	<div id="main">
-	
-		<table>
-			
-			<tr class="project" onclick="document.location = '/gravity'">
-			
-				<td><img class="image" src="gravity.png" alt="Gravity image"></td>
-		
-				<td class="description"><span>Simulates gravitational motion in multi-body systems.</span></td>
-		
-				<td class="date"><span>Update: May 4, 2015</span></td>
-			
-			</tr>
-			
-			<tr class="project" onclick="document.location = '/calc'">
-			
-				<td><img class="image" src="calc.png" alt="Calc image"></td>
-		
-				<td class="description"><span>Visualizes physics problems involving position, velocity, and acceleration.</span></td>
-		
-				<td class="date"><span>Update: April 27, 2015</span></td>
-			
-			</tr>
-			
-			<tr class="project" onclick="document.location = '/dots'">
-			
-				<td><img class="image" src="dots.png" alt="Dots image"></td>
-		
-				<td class="description"><span>Simulates inter-species competition and evolution over time in a simple environment.</span></td>
-		
-				<td class="date"><span>Update: April 19, 2015</span></td>
-			
-			</tr>
-			
-		</table>
-		
-	</div>
-
+444:44:44:44.444
 </body>
 
+<script>
+var duration = 10000000000;
+
+function updateClock() {
+	let time = duration - (new Date().getTime() % duration);
+	
+	let days = Math.floor(time/(24*60*60*1000));
+	let hours = Math.floor(time/(60*60*1000)) % 60;
+	let minutes = Math.floor(time/(60*1000)) % 60;
+	let seconds = Math.floor(time/1000) % 60;
+	let millis = time % 1000;
+		
+    document.body.innerHTML = days + ":" + pad(hours, 2) + ":" + pad(minutes, 2) + ":" + pad(seconds, 2) + "." + pad(millis, 3);
+}
+
+function pad(number, length) {
+    var my_string = '' + number;
+    while (my_string.length < length) {
+        my_string = '0' + my_string;
+    }
+    return my_string;
+}
+
+setInterval(updateClock, 41);
+</script>
 </html>
