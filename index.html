@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<!--Everybody dies twice.  The first is when your heart stops beating.  The second is when somebody says your name for the last time.-->
+<!--They say you die twice. One time when you stop breathing and a second time, a bit later on, when somebody says your name for the last time.-->
 <head>
 <style>
 html {
@@ -33,7 +33,7 @@ function updateClock() {
 	let time = duration - (new Date().getTime() % duration);
 	
 	let days = Math.floor(time/(24*60*60*1000));
-	let hours = Math.floor(time/(60*60*1000)) % 60;
+	let hours = Math.floor(time/(60*60*1000)) % 24;
 	let minutes = Math.floor(time/(60*1000)) % 60;
 	let seconds = Math.floor(time/1000) % 60;
 	let millis = time % 1000;
