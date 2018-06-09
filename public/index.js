@@ -52,7 +52,7 @@ function updateDots() {
 	}
 }
 
-var webSocket = new WebSocket("ws://localhost:5000");
+var webSocket = new WebSocket("ws://raisinraisin.herokuapp.com");
 webSocket.onmessage = function (event) {
 	console.log(event.data);
 	let newDotList = [];
