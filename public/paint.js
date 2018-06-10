@@ -289,7 +289,7 @@ function drawCursors() {
 }
 
 //WebSocket
-var webSocket = new WebSocket("ws://24.197.223.174:5000");
+var webSocket = new WebSocket("ws://raisinraisin.herokuapp.com");
 webSocket.onmessage = function(e) {
 	let split = e.data.split(" ");
 		
