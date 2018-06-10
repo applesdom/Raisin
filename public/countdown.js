@@ -24,13 +24,41 @@ function pad(number, length) {
     return my_string;
 }
 
-function Dot(x, y, highlight) {
+function Dot(x, y) {
 	this.x = x;
 	this.y = y;
-	this.highlight = highlight;
 }
 
 var dotList = [];
+for(let i = 0; i < 512; i ++) {
+	var dot = new Dot(0, 0);
+	while(true) {
+		console.log("lol");
+		if(dotList.length < 2048) {
+			let dis = 512*Math.pow(Math.random() - 0.5, 5) + 16;
+			//let dis = 128*Math.pow(Math.random() - 0.5, 3) + 16;
+			let dir = Math.random()*2*Math.PI;
+			dot.x = Math.floor(Math.cos(dir)*dis + 32);
+			dot.y = Math.floor(Math.sin(dir)*dis + 32);
+		} else {
+			dot.x = Math.floor(Math.random()*64);
+			dot.y = Math.floor(Math.random()*64);
+		}
+		
+		var duplicate = false;
+		for(let dot2 of dotList) {
+			if(dot2.x === dot.x && dot2.y === dot.y) {
+				duplicate = true;
+				break;
+			}
+		}
+		if(!duplicate) {
+			break;
+		}
+	}
+	dotList.push(dot);
+}
+updateDots();
 
 function updateDots() {
 	g.fillStyle = "#000000";
@@ -50,19 +78,6 @@ function updateDots() {
 		g.fill();
 		g.stroke();
 	}
-}
-
-var webSocket = new WebSocket("ws://raisinraisin.herokuapp.com");
-webSocket.onmessage = function (event) {
-	console.log(event.data);
-	let newDotList = [];
-	let split = event.data.split(" ");
-	for(let i = 0; i < split.length - 2; i += 2) {
-		newDotList.push(new Dot(Number.parseFloat(split[i]), Number.parseFloat(split[i+1]), false));
-	}
-	newDotList.push(new Dot(Number.parseFloat(split[split.length - 2]), Number.parseFloat(split[split.length - 1]), true));
-	dotList = newDotList;
-	updateDots();
 }
 
 setInterval(updateClock, 41);

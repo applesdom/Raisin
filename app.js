@@ -8,71 +8,132 @@ app.use(express.static(path.join(__dirname, '/public')));
 
 // GET method route
 app.get('/', function(req, res) {
-	res.sendFile(path.join(__dirname + '/index.html'));
+	res.sendFile(path.join(__dirname + '/public/paint.html'));
 });
 
-function Client(ws, x, y) {
-	this.ws = ws;
-	this.x = x;
-	this.y = y;
-}
-
-var clientList = [];
-
-function sendToAll() {
-	for(let client of clientList) {
-		let sendString = "";
-		for(let client2 of clientList) {
-			if(client !== client2) {
-				sendString += client2.x + " " + client2.y + " ";
-			}
-		}
-		sendString += client.x + " " + client.y;
-		client.ws.send(sendString);
-	}
-}
-
-//WebSocket route
-app.ws('/', function(ws, req) {
-	//console.log("New connection from " + ws._socket.remoteAddress);
-	
-	var client = new Client(ws, 0, 0);
-	while(true) {
-		if(clientList.length < 2048) {
-			let dis = 512*Math.pow(Math.random() - 0.5, 5) + 16;
-			//let dis = 128*Math.pow(Math.random() - 0.5, 3) + 16;
-			let dir = Math.random()*2*Math.PI;
-			client.x = Math.floor(Math.cos(dir)*dis + 32);
-			client.y = Math.floor(Math.sin(dir)*dis + 32);
-		} else {
-			client.x = Math.floor(Math.random()*64);
-			client.y = Math.floor(Math.random()*64);
-		}
-		
-		var duplicate = false;
-		for(let client2 of clientList) {
-			if(client2.x === client.x && client2.y === client.y) {
-				duplicate = true;
-				break;
-			}
-		}
-		if(!duplicate) {
-			break;
-		}
-	}
-	clientList.push(client);
-	
-	ws.on('close', function(msg) {
-		//console.log("Client from " + ws._socket.remoteAddress + " disconnected");
-		clientList.splice(clientList.indexOf(client), 1);
-		
-		sendToAll();
-	});
-	
-	sendToAll();
-});
 
 var port = process.env.PORT || 3000;
 app.listen(port, function() {
 	console.log('Server listening on port ' + port);
 });
+
+//BEGIN CLUSTERFUCK
+//Classes
+function Point(x, y) {
+	this.x = x;
+	this.y = y;
+}
+
+function Cursor(pos, tool) {
+	this.pos = pos;
+	this.tool = tool;
+}
+
+//Tilemap
+var tileMap = new Map();
+
+function setPixel(point, value) {
+	let key = Math.floor(point.x / 16) + " " + Math.floor(point.y / 16);
+	if(!tileMap.has(key)) {
+		let tileData = [];
+		for(let i = 0; i < 256; i ++) {
+			tileData[i] = 0;
+		}
+		tileMap.set(key, tileData);
+	}
+	
+	tileMap.get(key)[(point.x - Math.floor(point.x / 16)*16) + 16*(point.y - Math.floor(point.y / 16)*16)] = value;
+	
+	if(value === 0) {
+		let tileData = tileMap.get(key);
+		for(let i = 0; i < 256; i ++) {
+			if(tileData[i] != 0) {
+				return;
+			}
+		}
+		tileMap.delete(key);
+	}
+}
+
+function getTile(tilePoint) {
+	let key = tilePoint.x + " " + tilePoint.y;
+	if(tileMap.has(key)) {
+		let tileData = tileMap.get(key);
+		let ret = "";
+		for(let i = 0; i < 256; i ++) {
+			ret += tileData[i].toString(16);
+		}
+		return ret;
+	} else {
+		return "0";
+	}
+}
+
+//Clientmap
+var clientMap = new Map();
+
+//WebSocket route
+app.ws('/', function(ws, req) {
+	console.log("New connection from " + ws._socket.remoteAddress);
+	clientMap.set(ws, null);
+	
+	ws.on('message', function(msg) {
+		let split = msg.split(" ");
+		
+		if(split[0] === "c") {
+			if(split[1] === "null") {
+				clientMap.set(ws, null);
+			} else {
+				clientMap.set(ws, new Cursor(new Point(parseFloat(split[1]), parseFloat(split[2])), parseInt(split[3])));
+			}
+		} else if(split[0] === "p") {
+			setPixel(new Point(parseInt(split[1]), parseInt(split[2])), parseInt(split[3]));
+			outSet.add(Math.floor(parseInt(split[1])/16) + " " + Math.floor(parseInt(split[2])/16));
+		} else if(split[0] === "t") {
+			let tilePoint = new Point(parseInt(split[1]), parseInt(split[2]));
+			let tileData = getTile(tilePoint);
+			if(tileData !== "0") {
+				ws.send("t " + tilePoint.x + " " + tilePoint.y + " " + getTile(tilePoint));
+			}
+		}
+		//console.log(msg);
+	});
+		
+	ws.on('close', function(msg) {
+		console.log("Client from " + ws._socket.remoteAddress + " disconnected");
+		clientMap.delete(ws);
+	});
+});
+
+var outSet = new Set();
+
+function broadcast() {
+	for(let ws of clientMap.keys()) {
+		if(ws.readyState !== 1) {
+			continue;
+		}
+		
+		let out = "c";
+		for(let ws2 of clientMap.keys()) {
+			if(ws !== ws2) {
+				let cursor = clientMap.get(ws2);
+				if(cursor !== null) {
+					out += " " + cursor.pos.x + " " + cursor.pos.y + " " + cursor.tool;
+				}
+			}
+		}
+		ws.send(out);
+		
+		for(let key of outSet) {
+			let split = key.split(" ");
+			let tilePoint = new Point(parseInt(split[0]), parseInt(split[1]));
+			let tileData = getTile(tilePoint);
+			//if(tileData !== "0") {
+				ws.send("t " + key + " " + tileData);
+			//}
+		}
+	}
+
+	outSet = new Set();
+}
+setInterval(broadcast, 20);
