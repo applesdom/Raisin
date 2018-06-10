@@ -290,6 +290,7 @@ function drawCursors() {
 
 //WebSocket
 var webSocket = new WebSocket("ws://raisinraisin.herokuapp.com");
+//var webSocket = new WebSocket("ws://localhost:5000");
 webSocket.onmessage = function(e) {
 	let split = e.data.split(" ");
 		
@@ -301,6 +302,9 @@ webSocket.onmessage = function(e) {
 		render();
 	} else if(split[0] === "t") {
 		setTile(new Point(parseInt(split[1]), parseInt(split[2])), split[3]);
+		render();
+	} else if(split[0] === "p") {
+		setPixel(new Point(parseInt(split[1]), parseInt(split[2])), parseInt(split[3]));
 		render();
 	}
 }

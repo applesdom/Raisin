@@ -55,6 +55,15 @@ function setPixel(point, value) {
 	}
 }
 
+function getPixel(point) {
+	let key = Math.floor(point.x / 16) + " " + Math.floor(point.y / 16);
+	if(!tileMap.has(key)) {
+		return 0;
+	} else {
+		return tileMap.get(key)[(point.x - Math.floor(point.x / 16)*16) + 16*(point.y - Math.floor(point.y / 16)*16)];
+	}	
+}
+
 function getTile(tilePoint) {
 	let key = tilePoint.x + " " + tilePoint.y;
 	if(tileMap.has(key)) {
@@ -88,7 +97,7 @@ app.ws('/', function(ws, req) {
 			}
 		} else if(split[0] === "p") {
 			setPixel(new Point(parseInt(split[1]), parseInt(split[2])), parseInt(split[3]));
-			outSet.add(Math.floor(parseInt(split[1])/16) + " " + Math.floor(parseInt(split[2])/16));
+			outSet.add(parseInt(split[1]) + " " + parseInt(split[2]));
 		} else if(split[0] === "t") {
 			let tilePoint = new Point(parseInt(split[1]), parseInt(split[2]));
 			let tileData = getTile(tilePoint);
@@ -126,11 +135,8 @@ function broadcast() {
 		
 		for(let key of outSet) {
 			let split = key.split(" ");
-			let tilePoint = new Point(parseInt(split[0]), parseInt(split[1]));
-			let tileData = getTile(tilePoint);
-			//if(tileData !== "0") {
-				ws.send("t " + key + " " + tileData);
-			//}
+			let point = new Point(parseInt(split[0]), parseInt(split[1]));
+			ws.send("p " + key + " " + getPixel(point));
 		}
 	}
 
