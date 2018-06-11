@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Paint</title>
+<style>
+body {
+	background-color: black;
+	margin: 0;
+	overflow: hidden;
+}
+#canvas {
+	cursor: url(res/brush_4.png), auto;
+}
+#no_connection {
+	position: absolute;
+	left: 10px;
+	top: 10px;
+}
+#toolbar {
+	position: absolute;
+	right: 10px;
+	top: 10px;
+	display: grid;
+	grid-gap: 2px;
+	grid-template-columns: auto auto;
+}
+button {
+	height: 24px;
+	width: 24px;
+	padding: 2px;
+	border-style: outset;
+}
+</style>
+</head>
+<body>
+	<canvas id="canvas"></canvas>
+	<image id="no_connection" src="res/no_connection.png"></image>
+	<div id="toolbar">
+		<button type="button" id="pan_button"><image src="res/pan.png"></image></button>
+		<button type="button" id="grid_button"><image src="res/grid.png"></image></button>
+		<button type="button" id="color_button_4"><image src="res/red.png"></image></button>
+		<button type="button" id="color_button_5"><image src="res/brown.png"></image></button>
+		<button type="button" id="color_button_6"><image src="res/orange.png"></image></button>
+		<button type="button" id="color_button_7"><image src="res/yellow.png"></image></button>
+		<button type="button" id="color_button_8"><image src="res/lime.png"></image></button>
+		<button type="button" id="color_button_9"><image src="res/green.png"></image></button>
+		<button type="button" id="color_button_10"><image src="res/cyan.png"></image></button>
+		<button type="button" id="color_button_11"><image src="res/blue.png"></image></button>
+		<button type="button" id="color_button_12"><image src="res/magenta.png"></image></button>
+		<button type="button" id="color_button_13"><image src="res/violet.png"></image></button>
+		<button type="button" id="color_button_14"><image src="res/beige.png"></image></button>
+		<button type="button" id="color_button_15"><image src="res/pink.png"></image></button>
+		<button type="button" id="color_button_0"><image src="res/white.png"></image></button>
+		<button type="button" id="color_button_1"><image src="res/light_grey.png"></image></button>
+		<button type="button" id="color_button_3"><image src="res/black.png"></image></button>
+		<button type="button" id="color_button_2"><image src="res/dark_grey.png"></image></button>
+	</div>
+</body>
+
+<script src="paint.js"></script>
+</html>
