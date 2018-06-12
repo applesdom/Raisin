@@ -21,7 +21,7 @@ function PaintCanvas() {
 	this.imageMap = new Map();
 	
 	this.colorArray = ["#ffffff", "#a0a0a0", "#606060", "#000000",
-					"#ff0000", "#800000", "#ff8000", "#ffff00",
+					"#ff0000", "#800000", "#ff8000", "#fff010",
 					"#00ff00", "#008000", "#00ffff", "#0000ff",
 					"#ff00ff", "#8000ff", "#ffc080", "#ff80ff"];
 	
@@ -115,9 +115,11 @@ function PaintCanvas() {
 
 //Canvas
 var canvas = document.getElementById("canvas");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 var g = canvas.getContext("2d");
 var cursorList = [];
-var camera = new Camera(0, 0, 10);
+var camera = new Camera(-(canvas.width/2)/10, -(canvas.height/2)/10, 10);
 var pCanvas = new PaintCanvas();
 
 //Mouse input
@@ -367,10 +369,11 @@ setInterval(function broadcast() {
 				if(sentList.indexOf(key) < 0) {
 					webSocket.send("t " + key);
 					sentList.push(key);
-				}
-				count ++;
-				if(count > 100) {
-					break;
+					
+					count ++;
+					if(count > 100) {
+						break;
+					}
 				}
 			}
 		}

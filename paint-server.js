@@ -45,6 +45,19 @@ function PaintCanvas() {
 			return this.tileMap.get(key)[x + 16*y];
 		}	
 	}
+	
+	this.setTile = function(x, y, data) {
+		let key = x + " " + y;
+		if(data === "0") {
+			this.tileMap.delete(key);
+		}
+		
+		let tileData = [];
+		for(let i = 0; i < 256; i ++) {
+			tileData[i] = parseInt(data.charAt(i), 16);
+		}
+		this.tileMap.set(key, tileData);
+	}
 
 	this.getTile = function(tx, ty) {
 		let key = tx + " " + ty;
@@ -138,8 +151,54 @@ function broadcast() {
 	sendSet.clear();
 }
 
+//Save/load
+var fs = require('fs');
+require('isomorphic-fetch');
+var Dropbox = require('dropbox').Dropbox;
+
+var dbx = new Dropbox({ accessToken: 'OUSHL7vM30AAAAAAAAAAMEYVL52FCaQHRmnh8hc6oQyhDmFpkcUhIheSlQJ-8N2n' });
+
+function load() {
+	dbx.sharingGetSharedLinkFile({url: "https://www.dropbox.com/s/rsx0j9rzctn0zpn/paint.dat"})
+        .then(function(data) {
+			let dataString = data.fileBinary.toString("utf-8");
+			if(dataString === "") {
+				return;
+			}
+			
+			let split = dataString.split(" ");
+			for(let i = 0; i < split.length; i += 3) {
+				pCanvas.setTile(parseInt(split[i], 10), parseInt(split[i+1], 10), split[i+2]);
+			}
+        })
+        .catch(function(error) {
+			console.error(error);
+        });
+}
+
+function save() {
+	console.log("Saving to dropbox")
+	let data = "";
+	for(let key of pCanvas.tileMap.keys()) {
+		let split = key.split(" ");
+		data += key + " " + pCanvas.getTile(parseInt(split[0]), parseInt(split[1])) + " ";
+	}
+	data = data.trim();
+	
+	dbx.filesUpload({path: "/paint.dat", contents: data, mode: 'overwrite'})
+		.then(function(response) {
+            //console.log(response);
+        })
+        .catch(function(error) {
+			console.error(error);
+		})
+}
+
 //Main
 var paintServer = function(app) {
+	load();
+	setInterval(save, 5*60*1000);
+	
 	app.ws('/paint', newConnection);
 	setInterval(broadcast, 20);
 };
