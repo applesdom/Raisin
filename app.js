@@ -16,6 +16,9 @@ app.get('/paint', function(req, res) {
 app.get('/countdown', function(req, res) {
 	res.sendFile(path.join(__dirname, '/public/countdown/countdown.html'));
 });
+app.get('/raytracer', function(req, res) {
+	res.sendFile(path.join(__dirname, '/public/raytracer/raytracer.html'));
+});
 
 //Launch server
 var port = process.env.PORT || 3000;

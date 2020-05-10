@@ -1,0 +1,81 @@
+Introduction
+# Online JS Raytracer by Dominic Voto
+
+# Scene description is read from below
+# Image is generated to the right
+# Click the render button below to start!
+
+imgsize 400 400
+
+# View orientation set by next four parameters
+campos -12 4 -1
+camdir 1 -0.18 0.1
+updir 0 1 0                # Used for roll control
+fov 35
+
+bgcolor 160 192 255
+bgfade 1              # Sky lightens toward zenith
+
+# Lights are defined by position (x y z) and color
+# (r g b). Two variants exist: DirLights have
+# direction (x y z), but no position; SpotLights
+# have position, direction, and angle (degrees)
+
+# Try out each light variant by editing below!
+light -3 4 2 255 255 255
+#spotlight -6 8 4 6 -8 -4 15 255 255 255
+#dirlight 3 -4 -2 255 255 255
+
+# Materials hold color, phong parameters, and
+# optical parameters. Color is set as (r g b).
+# Phong parameters include ambient, diffuse, and
+# specular constants, as well as shininess
+# exponent. Optical parameters are opacity and
+# index of refraction. Newly created primitives
+# have the current material automatically applied
+# to them. Materials can be saved and retrieved by
+# name for later use.
+
+mtlcolor 128 128 128
+mtlphong 0.2 0.4 0.5 8
+mtloptics 1.0 1.0
+mtlname plain
+
+# Spheres are defined by position and radius
+mtlcolor 255 16 16
+sphere -2 0.75 -2 0.75
+mtlcolor 16 255 16
+sphere 0 1 0 1
+mtlcolor 16 16 255
+sphere -2 0.5 2 0.5
+
+# Reflective materials have high index of refract
+mtlcolor 255 255 255
+mtlphong 0 0.2 0.8 32
+mtloptics 1 64
+sphere 6 3 -0.6 3
+
+# Transparent materials have low opacity
+mtloptics 0.05 2.5
+sphere -3 0.5 0.1 0.5
+
+usemtl plain
+texture tile1
+
+# Vertices are defined as 3d coordinates
+v -6 0 -4
+v -6 0 4
+v 12 0 4
+v 12 0 -4
+
+# Texture vertices are defined as 2d coordinates
+vt 0 0
+vt 0 4
+vt 9 4
+vt 9 0
+
+# Faces are defined with vertex indices, in
+# counter-clockwise order
+f 1/1 2/2 3/3
+f 1/1 3/3 4/4
+

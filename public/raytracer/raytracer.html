@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Ray Tracer</title>
+<style>
+html {
+  height: 100%;
+}
+body {
+  height: 100%;
+  margin: 0;
+  background-image: linear-gradient(to bottom right, gray, black);
+}
+#left {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  bottom: 0px;
+}
+#right {
+  position: absolute;
+  top: 10px;
+  right: -110px;
+  width: 100px;
+  height: 100px;
+}
+#sidebar {
+  height: 100%;
+  padding: 10px;
+  background-color: rgb(192, 208, 224);
+  text-align: center;
+  background-color: rgb(192, 208, 224);
+  text-align: center;
+  overflow: auto;
+}
+#accels {
+  text-align: left;
+}
+button {
+  font-size: 16px;
+}
+#out {
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  max-height: 120px;
+  margin: 10px;
+  text-align: left;
+  overflow: auto;
+  font-size: 16px;
+}
+p {
+  margin: 2px;
+}
+</style>
+</head>
+<body>
+  <div id="left">
+    <div id="right">
+      <canvas id="canvas"></canvas>
+    </div>
+    <div id="sidebar">
+	    <textarea id="textarea" rows="36" cols="52"></textarea><br>
+      <label for="select">Load scene:</label>
+      <select id="select" onfocus="this.selectedIndex = -1;"></select><br>
+      <br>
+      <div id="accels">
+        <input type="checkbox" id="noaccel" checked="true">
+        <label for="noaccel"> No acceleration structure</label><br>
+        <input type="checkbox" id="bbaccel">
+        <label for="bbaccel"> Simple bounding box check</label><br>
+        <input type="checkbox" id="bvhbalanceaccel">
+        <label for="bvhbalanceaccel"> BVH (balanced)</label><br>
+        <input type="checkbox" id="bvhspatialaccel">
+        <label for="bvhspatialaccel"> BVH (spatial halving)</label><br>
+        <input type="checkbox" id="bvhsahaccel">
+        <label for="bvhsahaccel"> BVH (SAH)</label><br>
+      </div>
+      <br>
+      <button id="button" type="button">Render Scene</button>
+      <div id="out"></div>
+    </div>
+  </div>
+</body>
+
+<script src="vector.js"></script>
+<script src="light.js"></script>
+<script src="primitive.js"></script>
+<script src="accelerator.js"></script>
+<script src="raytracer.js"></script>
+</html>
