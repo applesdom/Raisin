@@ -19,7 +19,7 @@ var select = document.getElementById('select');
 var scene_file_list = ['default_scene.txt', 's5.txt', 's6.txt', 'teapot.txt', 
                        'test1.txt', 'test2.txt', 'test3.txt', 'test4.txt'];
 var scene_list = []
-for(let i = 0; i < scene_file_list.length; i ++) {
+function load_scene(i) {
   let file = scene_file_list[i];
   let req = new XMLHttpRequest();
   req.addEventListener('load', function() {
@@ -32,10 +32,14 @@ for(let i = 0; i < scene_file_list.length; i ++) {
     if(textarea.value == '') {
       textarea.value = scene[1];
     }
+    if(i < scene_file_list.length - 1) {
+      load_scene(i + 1);
+    }
   });
   req.open('GET', `res/${file}`);
   req.send();
 }
+load_scene(0);
 select.addEventListener('change', function(e) {
   for(const scene of scene_list) {
     if(scene[0] == e.target.value) {

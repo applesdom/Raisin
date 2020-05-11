@@ -25,7 +25,7 @@ body {
   height: 100px;
 }
 #sidebar {
-  height: 100%;
+  height: calc(100% - 20px);
   padding: 10px;
   background-color: rgb(192, 208, 224);
   text-align: center;
@@ -40,11 +40,7 @@ button {
   font-size: 16px;
 }
 #out {
-  position: absolute;
-  left: 0px;
-  right: 0px;
-  bottom: 0px;
-  max-height: 120px;
+  width: 100%;
   margin: 10px;
   text-align: left;
   overflow: auto;
@@ -61,7 +57,7 @@ p {
       <canvas id="canvas"></canvas>
     </div>
     <div id="sidebar">
-	    <textarea id="textarea" rows="36" cols="52"></textarea><br>
+	    <textarea id="textarea" rows="26" cols="52"></textarea><br>
       <label for="select">Load scene:</label>
       <select id="select" onfocus="this.selectedIndex = -1;"></select><br>
       <br>
@@ -79,6 +75,7 @@ p {
       </div>
       <br>
       <button id="button" type="button">Render Scene</button>
+      <br>
       <div id="out"></div>
     </div>
   </div>
