@@ -333,7 +333,7 @@ function drawCursors() {
 }
 
 //WebSocket
-var webSocket = new WebSocket("ws://raisinraisin.herokuapp.com/paint");
+var webSocket = new WebSocket("wss://raisinraisin.herokuapp.com/paint");
 //var webSocket = new WebSocket("ws://localhost:5000/paint");
 webSocket.onmessage = function(e) {
 	let split = e.data.split(" ");
