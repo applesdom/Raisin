@@ -156,7 +156,7 @@ var fs = require('fs');
 require('isomorphic-fetch');
 var Dropbox = require('dropbox').Dropbox;
 
-var dbx = new Dropbox({ accessToken: 'OUSHL7vM30AAAAAAAAAAMEYVL52FCaQHRmnh8hc6oQyhDmFpkcUhIheSlQJ-8N2n' });
+var dbx = new Dropbox({ fetch: fetch, accessToken: 'OUSHL7vM30AAAAAAAAAAMEYVL52FCaQHRmnh8hc6oQyhDmFpkcUhIheSlQJ-8N2n' });
 
 function load() {
 	dbx.sharingGetSharedLinkFile({url: "https://www.dropbox.com/s/rsx0j9rzctn0zpn/paint.dat"})
