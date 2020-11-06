@@ -15,5 +15,8 @@
     "express-ws": "^4.0.0",
     "http": "0.0.0",
     "isomorphic-fetch": "^3.0.0"
+  },
+  "engines": {
+    "node": "8.x"
   }
 }
