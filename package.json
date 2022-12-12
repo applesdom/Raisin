@@ -11,7 +11,7 @@
   "dependencies": {
     "dropbox": "^4.0.7",
     "ejs": "^2.6.1",
-    "express": "^4.16.3",
+    "express": "^4.17.3",
     "express-ws": "^4.0.0",
     "http": "0.0.0",
     "isomorphic-fetch": "^3.0.0"
